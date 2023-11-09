@@ -353,6 +353,21 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		0ABEA0852AFB6FBF000A724C /* snowmen.xml in Resources */ = {isa = PBXBuildFile; fileRef = 0AF99C172AFB6A55003EEDC0 /* snowmen.xml */; };
+		0ABEA0862AFB6FC0000A724C /* snowmen.xml in Resources */ = {isa = PBXBuildFile; fileRef = 0AF99C172AFB6A55003EEDC0 /* snowmen.xml */; };
+		0ABEA08A2AFC0226000A724C /* snowmen.c in Sources */ = {isa = PBXBuildFile; fileRef = 0AF99C132AFB69B2003EEDC0 /* snowmen.c */; };
+		0ABEA08B2AFC0227000A724C /* snowmen.c in Sources */ = {isa = PBXBuildFile; fileRef = 0AF99C132AFB69B2003EEDC0 /* snowmen.c */; };
+		0ABEA08C2AFC022B000A724C /* snowmen.c in Sources */ = {isa = PBXBuildFile; fileRef = 0AF99C132AFB69B2003EEDC0 /* snowmen.c */; };
+		0AF99BFD2AFB5F82003EEDC0 /* XScreenSaverSubclass.m in Sources */ = {isa = PBXBuildFile; fileRef = AF9CC7A0099580E70075E99B /* XScreenSaverSubclass.m */; };
+		0AF99BFF2AFB5F82003EEDC0 /* libjwxyz.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AF4808C1098C3B6C00FB32B8 /* libjwxyz.a */; };
+		0AF99C002AFB5F82003EEDC0 /* ScreenSaver.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF976ED30989BF59001F8B92 /* ScreenSaver.framework */; };
+		0AF99C012AFB5F82003EEDC0 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF2C31E515C0F7FE007A6896 /* QuartzCore.framework */; };
+		0AF99C022AFB5F82003EEDC0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		0AF99C032AFB5F82003EEDC0 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AF48112B0990A2C700FB32B8 /* Carbon.framework */; };
+		0AF99C042AFB5F82003EEDC0 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEE0BC611A6B0D6200C098BF /* OpenGL.framework */; };
+		0AF99C052AFB5F82003EEDC0 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = AF78369617DB9F25003B9FC0 /* libz.dylib */; };
+		0AF99C142AFB69B2003EEDC0 /* snowmen_textures.h in Headers */ = {isa = PBXBuildFile; fileRef = 0AF99C122AFB69B2003EEDC0 /* snowmen_textures.h */; };
+		0AF99C182AFB6A56003EEDC0 /* snowmen.xml in Resources */ = {isa = PBXBuildFile; fileRef = 0AF99C172AFB6A55003EEDC0 /* snowmen.xml */; };
 		5501D1961DBDCC3D00624BE9 /* xshm.c in Sources */ = {isa = PBXBuildFile; fileRef = 5501D1941DBDCC0200624BE9 /* xshm.c */; };
 		550FB6001AD64424001A4FA5 /* Media-iOS.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 550FB5FD1AD64424001A4FA5 /* Media-iOS.xcassets */; };
 		55374E321E1582C6005E2362 /* pow2.c in Sources */ = {isa = PBXBuildFile; fileRef = 55374E301E1582AA005E2362 /* pow2.c */; };
@@ -4629,6 +4644,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		0AF99BF82AFB5F82003EEDC0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AF4808C0098C3B6C00FB32B8;
+			remoteInfo = jwxyz;
+		};
 		AF08399109930B6B00277BE9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -8765,6 +8787,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0AF99C0A2AFB5F82003EEDC0 /* Snowmen.saver */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = Snowmen.saver; sourceTree = BUILT_PRODUCTS_DIR; };
+		0AF99C122AFB69B2003EEDC0 /* snowmen_textures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = snowmen_textures.h; path = hacks/glx/snowmen_textures.h; sourceTree = "<group>"; };
+		0AF99C132AFB69B2003EEDC0 /* snowmen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = snowmen.c; path = hacks/glx/snowmen.c; sourceTree = "<group>"; };
+		0AF99C172AFB6A55003EEDC0 /* snowmen.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = snowmen.xml; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		32CA4F630368D1EE00C91783 /* xscreensaver_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = xscreensaver_Prefix.pch; sourceTree = "<group>"; };
@@ -9897,6 +9923,20 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0AF99BFE2AFB5F82003EEDC0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0AF99BFF2AFB5F82003EEDC0 /* libjwxyz.a in Frameworks */,
+				0AF99C002AFB5F82003EEDC0 /* ScreenSaver.framework in Frameworks */,
+				0AF99C012AFB5F82003EEDC0 /* QuartzCore.framework in Frameworks */,
+				0AF99C022AFB5F82003EEDC0 /* Cocoa.framework in Frameworks */,
+				0AF99C032AFB5F82003EEDC0 /* Carbon.framework in Frameworks */,
+				0AF99C042AFB5F82003EEDC0 /* OpenGL.framework in Frameworks */,
+				0AF99C052AFB5F82003EEDC0 /* libz.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF08399709930B6B00277BE9 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -14207,6 +14247,7 @@
 				AF296A6A2A5A776D007441BF /* PaperCube.saver */,
 				AF70B7822A81D025007C1EB8 /* CuboctEversion.saver */,
 				AF70B7A32A8320A6007C1EB8 /* Skulloop.saver */,
+				0AF99C0A2AFB5F82003EEDC0 /* Snowmen.saver */,
 			);
 			name = Products;
 			path = ..;
@@ -14686,6 +14727,8 @@
 				AF70B7AF2A8321B0007C1EB8 /* skull_model.c */,
 				AF70B7A62A832166007C1EB8 /* skulloop.c */,
 				AFE2A4720E2E90E300ADB298 /* skytentacles.c */,
+				0AF99C122AFB69B2003EEDC0 /* snowmen_textures.h */,
+				0AF99C132AFB69B2003EEDC0 /* snowmen.c */,
 				AFE30BFF0E52B1DC00CCF4A5 /* sonar-icmp.c */,
 				AFE30C000E52B1DC00CCF4A5 /* sonar-sim.c */,
 				AFE30C010E52B1DC00CCF4A5 /* sonar.c */,
@@ -14794,6 +14837,7 @@
 				AFF42888257D30BE001BC8CE /* co____9.xml */,
 				AFC2588B0988A468000655EE /* crackberg.xml */,
 				AFC5CFF32044AB27004CEB5E /* crumbler.xml */,
+				0AF99C172AFB6A55003EEDC0 /* snowmen.xml */,
 				AFC2588C0988A468000655EE /* critical.xml */,
 				AFC2588D0988A468000655EE /* crystal.xml */,
 				AFC2588E0988A468000655EE /* cube21.xml */,
@@ -15147,6 +15191,7 @@
 				AFC7592E158D8E8B00C5458E /* textclient.h in Headers */,
 				CE9289D419BD00E300961F22 /* async_netdb.h in Headers */,
 				AFE943B619DDF97F000A5E6D /* utf8wc.h in Headers */,
+				0AF99C142AFB69B2003EEDC0 /* snowmen_textures.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -15198,6 +15243,25 @@
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
+		0AF99BF62AFB5F82003EEDC0 /* Snowmen */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0AF99C072AFB5F82003EEDC0 /* Build configuration list for PBXNativeTarget "Snowmen" */;
+			buildPhases = (
+				0AF99BF92AFB5F82003EEDC0 /* Resources */,
+				0AF99BFB2AFB5F82003EEDC0 /* Sources */,
+				0AF99BFE2AFB5F82003EEDC0 /* Frameworks */,
+				0AF99C062AFB5F82003EEDC0 /* Run Update Info Plist */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0AF99BF72AFB5F82003EEDC0 /* PBXTargetDependency */,
+			);
+			name = Snowmen;
+			productName = DangerBall;
+			productReference = 0AF99C0A2AFB5F82003EEDC0 /* Snowmen.saver */;
+			productType = "com.apple.product-type.bundle";
+		};
 		AF08398F09930B6B00277BE9 /* Atlantis */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AF08399F09930B6B00277BE9 /* Build configuration list for PBXNativeTarget "Atlantis" */;
@@ -21487,9 +21551,6 @@
 					AFE6A1820CDD7B2E002805BF = {
 						DevelopmentTeam = 4627ATJELP;
 					};
-					AFE6A41B0CDD7FAA002805BF = {
-						DevelopmentTeam = 4627ATJELP;
-					};
 					AFEC23CD1CB6EAE100DE138F = {
 						DevelopmentTeam = 4627ATJELP;
 					};
@@ -21783,6 +21844,7 @@
 				AFA55B7909933F7200F3E977 /* Sierpinski3D */,
 				AF70B78E2A8320A6007C1EB8 /* Skulloop */,
 				AFE2A4560E2E904600ADB298 /* SkyTentacles */,
+				0AF99BF62AFB5F82003EEDC0 /* Snowmen */,
 				AFE30BE80E52B14700CCF4A5 /* Sonar */,
 				AFADD32B24B67100005456DC /* SphereEversion */,
 				AFA55D7F099358C400F3E977 /* Spheremonics */,
@@ -21839,6 +21901,14 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		0AF99BF92AFB5F82003EEDC0 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0AF99C182AFB6A56003EEDC0 /* snowmen.xml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF08399209930B6B00277BE9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -22628,6 +22698,7 @@
 				AF56895F26E7060500CCBA38 /* hilbert.xml in Resources */,
 				AF56896026E7060500CCBA38 /* hopalong.xml in Resources */,
 				AF56896126E7060500CCBA38 /* hydrostat.xml in Resources */,
+				0ABEA0862AFB6FC0000A724C /* snowmen.xml in Resources */,
 				AF56896226E7060500CCBA38 /* hypertorus.xml in Resources */,
 				AF56896326E7060500CCBA38 /* hypnowheel.xml in Resources */,
 				AF56896426E7060500CCBA38 /* ifs.xml in Resources */,
@@ -23294,6 +23365,7 @@
 				AF918B14158FC53D002B5D1E /* hilbert.xml in Resources */,
 				AF918B15158FC53D002B5D1E /* hopalong.xml in Resources */,
 				AFC0E8C71CDC60DE008CAFAC /* hydrostat.xml in Resources */,
+				0ABEA0852AFB6FBF000A724C /* snowmen.xml in Resources */,
 				AF918B18158FC53D002B5D1E /* hypertorus.xml in Resources */,
 				AF918B19158FC53D002B5D1E /* hypnowheel.xml in Resources */,
 				AF918B1A158FC53D002B5D1E /* ifs.xml in Resources */,
@@ -24688,6 +24760,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		0AF99C062AFB5F82003EEDC0 /* Run Update Info Plist */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}",
+			);
+			name = "Run Update Info Plist";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "$SOURCE_ROOT/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX\n";
+			showEnvVarsInLog = 0;
+		};
 		AF0BF6DE29456B2E000D9473 /* Run Update Info Plist */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -25489,7 +25578,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "$SOURCE_ROOT/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX";
+			shellScript = "$SOURCE_ROOT/update-info-plist.pl -q $BUILT_PRODUCTS_DIR/$PRODUCT_NAME$WRAPPER_SUFFIX\n";
 			showEnvVarsInLog = 0;
 		};
 		AF73FF321A09877F00E485E9 /* Run Update Info Plist */ = {
@@ -29686,6 +29775,15 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		0AF99BFB2AFB5F82003EEDC0 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0AF99BFD2AFB5F82003EEDC0 /* XScreenSaverSubclass.m in Sources */,
+				0ABEA08C2AFC022B000A724C /* snowmen.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AF08399409930B6B00277BE9 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -30585,6 +30683,7 @@
 				AF568A3A26E7060500CCBA38 /* penetrate.c in Sources */,
 				AF568A3B26E7060500CCBA38 /* petri.c in Sources */,
 				AF568A3C26E7060500CCBA38 /* phosphor.c in Sources */,
+				0ABEA08B2AFC0227000A724C /* snowmen.c in Sources */,
 				AF568A3D26E7060500CCBA38 /* piecewise.c in Sources */,
 				AF568A3E26E7060500CCBA38 /* pong.c in Sources */,
 				AF568A3F26E7060500CCBA38 /* popsquares.c in Sources */,
@@ -31381,6 +31480,7 @@
 				AF9189D5158FC334002B5D1E /* penetrate.c in Sources */,
 				AF9189D6158FC334002B5D1E /* petri.c in Sources */,
 				AF9189D7158FC334002B5D1E /* phosphor.c in Sources */,
+				0ABEA08A2AFC0226000A724C /* snowmen.c in Sources */,
 				AF9189D8158FC334002B5D1E /* piecewise.c in Sources */,
 				AF9189D9158FC334002B5D1E /* pong.c in Sources */,
 				AF9189DA158FC334002B5D1E /* popsquares.c in Sources */,
@@ -33079,6 +33179,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		0AF99BF72AFB5F82003EEDC0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
+			targetProxy = 0AF99BF82AFB5F82003EEDC0 /* PBXContainerItemProxy */;
+		};
 		AF08399009930B6B00277BE9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AF4808C0098C3B6C00FB32B8 /* jwxyz */;
@@ -36029,6 +36134,32 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		0AF99C082AFB5F82003EEDC0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				INFOPLIST_FILE = XScreenSaver.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = org.jwz.xscreensaver.Snowmen;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		0AF99C092AFB5F82003EEDC0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS = (
+					"USE_GL=1",
+					"$(GCC_PREPROCESSOR_DEFINITIONS_NOT_USED_IN_PRECOMPS)",
+				);
+				INFOPLIST_FILE = XScreenSaver.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = org.jwz.xscreensaver.Snowmen;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		AF0839A009930B6B00277BE9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -40720,12 +40851,22 @@
 		AFE6A42B0CDD7FAA002805BF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NUJ7V433LH;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		AFE6A42C0CDD7FAA002805BF /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NUJ7V433LH;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};
@@ -40946,13 +41087,14 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "iPhone Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_IDENTITY = "Apple Development: Jason Sikes (JD6N8YGUD4)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development: Jason Sikes (JD6N8YGUD4)";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "Apple Development: Jason Sikes (JD6N8YGUD4)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development: Jason Sikes (JD6N8YGUD4)";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 4627ATJELP;
+				DEVELOPMENT_TEAM = NUJ7V433LH;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -41064,13 +41206,14 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = NO;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: Jamie Zawinski (4627ATJELP)";
-				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "iPhone Distribution: Jamie Zawinski (4627ATJELP)";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Developer ID Application: Jamie Zawinski (4627ATJELP)";
+				CODE_SIGN_IDENTITY = "Apple Development: Jason Sikes (JD6N8YGUD4)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Development: Jason Sikes (JD6N8YGUD4)";
+				"CODE_SIGN_IDENTITY[sdk=iphonesimulator*]" = "Apple Development: Jason Sikes (JD6N8YGUD4)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development: Jason Sikes (JD6N8YGUD4)";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 4627ATJELP;
+				DEVELOPMENT_TEAM = NUJ7V433LH;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -41172,6 +41315,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		0AF99C072AFB5F82003EEDC0 /* Build configuration list for PBXNativeTarget "Snowmen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0AF99C082AFB5F82003EEDC0 /* Debug */,
+				0AF99C092AFB5F82003EEDC0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AF08399F09930B6B00277BE9 /* Build configuration list for PBXNativeTarget "Atlantis" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

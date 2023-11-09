@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<screensaver name="snowmen" _label="Snowmen" gl="yes">
+
+  <command arg="--root"/>
+
+  <xscreensaver-updater />
+
+  <_description>
+Ice-skating Snowmen!
+
+Written by Jason Sikes; 2023.
+  </_description>
+</screensaver>
