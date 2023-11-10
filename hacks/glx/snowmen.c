@@ -57,8 +57,8 @@ const GLdouble kYon    = 240;
 /* 'D' means 'Delta'. On every frame,
  * move the camera and snowmen by this amount.
  */
-const GLdouble kDCameraRho = 0.001;
-const GLfloat kDSnowmanRho = 0.01;
+const GLdouble kDCameraRho = 0.0001;
+const GLfloat kDSnowmanRho = 0.001;
 
 const GLfloat kCarrotScaleDivide = 1.9;
 #define kCarrotOutlineInverseScale 0.6, 0.6, 0.7
@@ -84,6 +84,10 @@ const GLfloat kUniverseEdgeRadius = 150;
 const GLfloat kShoreHeight = 1;
 const GLfloat kHillsHeight = 20;
 
+#define kHatTranslateOutline 0, 0.04, 0
+#define kHatScaleOutline 1.2, 1.8, 1.2
+#define kHatScaleStem 1.08, 1.05/1.8, 1.08
+
 #define kCountOfSnowmen 9
 
 /* IMPORTANT! See comment under 'setupTrees()' for how to set this value. */
@@ -108,6 +112,7 @@ const unsigned kCountOfTreeTrunkSlices = 8;
 #define kColorSnowmanArm 0.63, 0.32, 0.18, 1
 #define kColorIce 0.6, 0.8, 0.9, 0.3
 #define kColorTreeTrunk 0.2, 0.2, 0, 1
+#define kColorInkOutline 0, 0, 0, 1
 
 Vert4d snowmanHatColors[kCountOfSnowmen] = {
     {
@@ -259,6 +264,14 @@ typedef struct {
     GLdouble cameraRho;
     GLfloat snowmanRho;
     
+    // In normal circumstances, we would simply use GL_FRONT and GL_BACK for face culling,
+    // but since we are sometimes drawing reflections and making an outline, it's better to use state variables.
+    GLenum cullingFaceFront;
+    GLenum cullingFaceBack;
+    
+    // Some things are drawn casting a shadow.
+    Bool isDrawingShadows;
+
     SnowmanState_t snowmanIndividual[kCountOfSnowmen];
     TreeState_t treeIndividual[kCountOfTrees];
     
@@ -269,7 +282,7 @@ static void normalizeVertex(Vert3d *v);
 static void divideTriangle(snow_configuration *bp,
                            Vert3d *va, Vert3d *vb, Vert3d *vc,
                            Vert2d *ta, Vert2d *tb, Vert2d *tc,
-                           int iteration, int *snowballAssemblyIndex);
+                           int iteration, unsigned int *snowballAssemblyIndex);
 static void createBufferObjects(snow_configuration *bp);
 static void createAllTextures(ModeInfo *mi);
 static void createTexture(ModeInfo *mi,
@@ -336,7 +349,7 @@ static void normalizeVertex(Vert3d *v)
 static void divideTriangle(snow_configuration *bp,
                            Vert3d *va, Vert3d *vb, Vert3d *vc,
                            Vert2d *ta, Vert2d *tb, Vert2d *tc,
-                           int iteration, int *snowballAssemblyIndex)
+                           int iteration, unsigned int *snowballAssemblyIndex)
 {
     if (iteration > 0) {
         Vert3d v1, v2, v3;
@@ -1410,7 +1423,10 @@ init_snow (ModeInfo *mi)
     
     bp->cameraRho = kPi;
     bp->snowmanRho = 0;
-    
+    bp->cullingFaceFront = GL_FRONT;
+    bp->cullingFaceBack = GL_BACK;
+    bp->isDrawingShadows = False;
+
     setupSnowmen(bp);
     
     createBufferObjects(bp);
@@ -1434,6 +1450,7 @@ static void drawSkate(snow_configuration *bp, Bool isOnLeft)
     glColor4f( kColorSkate );
     glPushMatrix();
     
+    glCullFace(bp->cullingFaceBack);
     glEnableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_INDEX_ARRAY);
@@ -1463,7 +1480,8 @@ static void drawArms(snow_configuration *bp)
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_INDEX_ARRAY);
     glDisable(GL_TEXTURE_2D);
-    
+    glCullFace(bp->cullingFaceBack);
+
     glBindBuffer( GL_ARRAY_BUFFER,  bp->bufferID[armCoordID] );
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[armIndicesID]);
@@ -1485,27 +1503,34 @@ static void drawCarrot(snow_configuration *bp, GLfloat radius)
 {
     glPushMatrix();
     
+    glCullFace(bp->cullingFaceFront);
     glEnableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnableClientState(GL_INDEX_ARRAY);
     glDisable(GL_TEXTURE_2D);
     
-    glScalef( radius, radius, radius );
-    glTranslatef( 0, 0, radius * kCarrotScaleDivide );
-    
-    glColor4f( kColorCarrot );
-    glScalef( kCarrotOutlineInverseScale );
-    
-    
     glBindBuffer(GL_ARRAY_BUFFER, bp->bufferID[carrotCoordID]);
     glVertexPointer(3, GL_FLOAT, 0, (GLvoid*) 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[carrotIndicesID]);
+
+    glScalef( radius, radius, radius );
+    glTranslatef( 0, 0, radius * kCarrotScaleDivide );
+
+    glColor4f(kColorInkOutline);
     glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_INT, (void*) 0);
     glDrawElements(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, (void*) (18 * sizeof(GLuint)));
     glDrawElements(GL_TRIANGLE_FAN, 8, GL_UNSIGNED_INT, (void*)  (28 * sizeof(GLuint)));
-    
+
+    if ( ! bp->isDrawingShadows) {
+        glColor4f( kColorCarrot );
+        glScalef( kCarrotOutlineInverseScale );
+        glCullFace(bp->cullingFaceBack);
+        
+        glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_INT, (void*) 0);
+        glDrawElements(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, (void*) (18 * sizeof(GLuint)));
+    }
+
     glPopMatrix();
-    
 }
 
 static void drawSnowball(snow_configuration *bp,
@@ -1516,7 +1541,8 @@ static void drawSnowball(snow_configuration *bp,
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
-    
+    glCullFace(bp->cullingFaceBack);
+
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, texture );
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[snowballTexID] );
@@ -1530,8 +1556,16 @@ static void drawSnowball(snow_configuration *bp,
     glScalef(radius, radius, radius);
     glDrawArrays(GL_TRIANGLES, 0, bp->snowballAry.countOfVertices);
     
-    glPopMatrix();
     glDisable( GL_TEXTURE_2D );
+    if ( ! bp->isDrawingShadows) {
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glScalef(outlineRadius / radius, outlineRadius / radius, outlineRadius / radius);
+        glColor4f(kColorInkOutline);
+        glCullFace(bp->cullingFaceFront);
+        glDrawArrays(GL_TRIANGLES, 0, bp->snowballAry.countOfVertices);
+    }
+    
+    glPopMatrix();
 }
 
 static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
@@ -1544,6 +1578,7 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
     glEnableClientState(GL_INDEX_ARRAY);
     glDisable(GL_TEXTURE_2D);
     
+    glCullFace(bp->cullingFaceBack);
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[hatCoordID] );
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[hatIndicesID]);
@@ -1574,6 +1609,37 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
                    GL_UNSIGNED_INT,
                    hatInfo->stemTriangleStripIndices);
     
+    if ( ! bp->isDrawingShadows) {
+        glColor4f(kColorInkOutline);
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        glDisable(GL_TEXTURE_2D);
+        
+        glCullFace(bp->cullingFaceFront);
+        glTranslatef(kHatTranslateOutline);
+        glScalef(kHatScaleOutline);
+
+        glDrawElements(GL_TRIANGLE_FAN,
+                       hatInfo->countOfBrimBottomTriangleFanIndices,
+                       GL_UNSIGNED_INT,
+                       hatInfo->brimBottomTriangleFanIndices);
+        glDrawElements(GL_TRIANGLE_FAN,
+                       hatInfo->countOfBrimTopTriangleFanIndices,
+                       GL_UNSIGNED_INT,
+                       hatInfo->brimTopTriangleFanIndices);
+        glDrawElements(GL_TRIANGLE_STRIP,
+                       hatInfo->countOfBrimTriangleStripIndices,
+                       GL_UNSIGNED_INT,
+                       hatInfo->brimTriangleStripIndices);
+        glScalef(kHatScaleStem);
+        glDrawElements(GL_TRIANGLE_FAN,
+                       hatInfo->countOfStemTopTriangleFanIndices,
+                       GL_UNSIGNED_INT,
+                       hatInfo->stemTopTriangleFanIndices);
+        glDrawElements(GL_TRIANGLE_STRIP,
+                       hatInfo->countOfStemTriangleStripIndices,
+                       GL_UNSIGNED_INT,
+                       hatInfo->stemTriangleStripIndices);
+    }
 }
 
 static void drawIce(snow_configuration *bp)
@@ -1582,6 +1648,7 @@ static void drawIce(snow_configuration *bp)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
+    glCullFace(bp->cullingFaceBack);
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDIce] );
     glBindBuffer( GL_ARRAY_BUFFER,   bp->bufferID[pondTexID] );
@@ -1598,6 +1665,7 @@ static void drawShore(snow_configuration *bp)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
+    glCullFace(bp->cullingFaceBack);
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDShore] );
     glBindBuffer( GL_ARRAY_BUFFER,   bp->bufferID[shoreTexID] );
@@ -1614,6 +1682,7 @@ static void drawHills(snow_configuration *bp)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
+    glCullFace(bp->cullingFaceBack);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDHills] );
@@ -1635,9 +1704,9 @@ static void drawTree(snow_configuration *bp, TreeState_t *state)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glEnable( GL_TEXTURE_2D );
-    
+
     glPushMatrix();
-    /* glCullFace( immediateBack ); */
+    glCullFace(bp->cullingFaceBack);
     glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDTrees]);
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesTexID]);
     glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
