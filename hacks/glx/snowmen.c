@@ -262,8 +262,6 @@ typedef struct {
     SnowmanState_t snowmanIndividual[kCountOfSnowmen];
     TreeState_t treeIndividual[kCountOfTrees];
     
-    // An initialization routine needs to maintain an index through several recursions.
-    int initAryIndex;
 } snow_configuration;
 
 // prototypes.
@@ -271,7 +269,7 @@ static void normalizeVertex(Vert3d *v);
 static void divideTriangle(snow_configuration *bp,
                            Vert3d *va, Vert3d *vb, Vert3d *vc,
                            Vert2d *ta, Vert2d *tb, Vert2d *tc,
-                           int iteration);
+                           int iteration, int *snowballAssemblyIndex);
 static void createBufferObjects(snow_configuration *bp);
 static void createAllTextures(ModeInfo *mi);
 static void createTexture(ModeInfo *mi,
@@ -338,7 +336,7 @@ static void normalizeVertex(Vert3d *v)
 static void divideTriangle(snow_configuration *bp,
                            Vert3d *va, Vert3d *vb, Vert3d *vc,
                            Vert2d *ta, Vert2d *tb, Vert2d *tc,
-                           int iteration)
+                           int iteration, int *snowballAssemblyIndex)
 {
     if (iteration > 0) {
         Vert3d v1, v2, v3;
@@ -365,23 +363,22 @@ static void divideTriangle(snow_configuration *bp,
         t3.y = (tc->y + tb->y) / 2;
         normalizeVertex(&v3);
         
-        divideTriangle(bp, va, &v1, &v2, ta, &t1, &t2, iteration - 1);
-        divideTriangle(bp, vc, &v2, &v3, tc, &t2, &t3, iteration - 1);
-        divideTriangle(bp, vb, &v3, &v1, tb, &t3, &t1, iteration - 1);
-        divideTriangle(bp, &v1, &v3, &v2, &t1, &t3, &t2, iteration - 1);
+        divideTriangle(bp, va, &v1, &v2, ta, &t1, &t2, iteration - 1, snowballAssemblyIndex);
+        divideTriangle(bp, vc, &v2, &v3, tc, &t2, &t3, iteration - 1, snowballAssemblyIndex);
+        divideTriangle(bp, vb, &v3, &v1, tb, &t3, &t1, iteration - 1, snowballAssemblyIndex);
+        divideTriangle(bp, &v1, &v3, &v2, &t1, &t3, &t2, iteration - 1, snowballAssemblyIndex);
     } else {
         Vert3d *vertAry = bp->snowballAry.vertAry;
         Vert2d *texAry = bp->snowballAry.texAry;
-        int *index = &(bp->initAryIndex);
         
-        vertAry[*index] = *va;
-        texAry[(*index)++] = *ta;
+        vertAry[*snowballAssemblyIndex] = *va;
+        texAry[(*snowballAssemblyIndex)++] = *ta;
         
-        vertAry[*index] = *vb;
-        texAry[(*index)++] = *tb;
+        vertAry[*snowballAssemblyIndex] = *vb;
+        texAry[(*snowballAssemblyIndex)++] = *tb;
         
-        vertAry[*index] = *vc;
-        texAry[(*index)++] = *tc;
+        vertAry[*snowballAssemblyIndex] = *vc;
+        texAry[(*snowballAssemblyIndex)++] = *tc;
     }
 }
 
@@ -389,7 +386,7 @@ static void createSnowballBufferObjects(snow_configuration *bp)
 {
     // Three iterations seems the perfect number to make what appears to be a lumpy snowball.
     const int countOfIterations = 3;
-    bp->initAryIndex = 0;
+    unsigned int snowballAssemblyIndex = 0;
     VertexTextureObject_t *ary = &(bp->snowballAry);
     
     int countOfVertices = (int) powf(4, (countOfIterations + 1)) * 3;
@@ -442,25 +439,25 @@ static void createSnowballBufferObjects(snow_configuration *bp)
     divideTriangle(bp,
                    vertSeed + 0, vertSeed + 1, vertSeed + 2,
                    texSeed + 0,  texSeed + 1,  texSeed + 2,
-                   countOfIterations);
+                   countOfIterations, &snowballAssemblyIndex);
     
     // bottom
     divideTriangle(bp,
                    vertSeed + 3, vertSeed + 2, vertSeed + 1,
                    texSeed + 0,  texSeed + 3,  texSeed + 4,
-                   countOfIterations);
+                   countOfIterations, &snowballAssemblyIndex);
     
     // left
     divideTriangle(bp,
                    vertSeed + 0, vertSeed + 2, vertSeed + 3,
                    texSeed + 0,  texSeed + 5,  texSeed + 6,
-                   countOfIterations);
+                   countOfIterations, &snowballAssemblyIndex);
     
     // right
     divideTriangle(bp,
                    vertSeed + 0, vertSeed + 3, vertSeed + 1,
                    texSeed + 0,  texSeed + 7,  texSeed + 8,
-                   countOfIterations);
+                   countOfIterations, &snowballAssemblyIndex);
     
     glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + snowballCoordID) );
     glBufferData(GL_ARRAY_BUFFER,
