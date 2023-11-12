@@ -45,14 +45,14 @@ const GLfloat kPi = 3.141592653589;
 const GLfloat kTau = 2.0 * kPi;
 
 const GLdouble kCameraPerspectiveAngle = 45;
-/* const GLfloat kCameraRadius = 68; */
-/* const GLfloat kCameraHeight = 500; */
+//const GLfloat kCameraRadius = 68;
+//const GLfloat kCameraHeight = 500;
 const GLdouble kCameraRadius = 28;
 const GLdouble kCameraHeight = 7;
 
 /* Near and far view planes. */
 const GLdouble kHither = 10;
-const GLdouble kYon    = 240;
+const GLdouble kYon    = 640;
 
 /* 'D' means 'Delta'. On every frame,
  * move the camera and snowmen by this amount.
@@ -75,7 +75,7 @@ const GLfloat kSnowmanMinorLoopCountRange      = 2.0;
 const GLfloat kSnowmanTiltAngleMultiplier      = -10;
 const GLfloat kSnowballRadiusStart             = 1;
 const GLfloat kSnowballOverlap                 = 1.2;
-const GLfloat kSnowballOutlineRadiusIncrement  = 0.1;
+const GLfloat kSnowballOutlineRadiusIncrement  = 0.06;
 const GLfloat kSnowballSizeRelativeToPrevious  = 0.75;
 
 
@@ -97,7 +97,7 @@ const GLfloat kHillsHeight = 20;
 #define kCountOfTreeSkirts 6
 
 #define kCountOfPondExteriorVertices 90
-#define kCountOfPondWeights 8
+#define kCountOfPondWeights 11
 
 
 const unsigned kCountOfTreeSkirtVertices = 16;
@@ -505,9 +505,10 @@ static void createPondBufferObjects(snow_configuration *bp)
      * After setting these, other elements have become dependent on them.
      */
     const float weights[kCountOfPondWeights] = {
-        4, 2, 1, 5, 4, 0, 0, 5
+        // 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+        12, 2, 0, 3, 4, 5, 0, 0, 0, 0
     };
-    const float kPondWeightMultiplier = 0.7;
+    const float kPondWeightModerator = 0.7;
     
     VertexTextureObject_t *ps = &(bp->pondInfo);
     
@@ -538,10 +539,10 @@ static void createPondBufferObjects(snow_configuration *bp)
     for (i = 0; i < kCountOfPondExteriorVertices; ++i) {
         r = 0;
         for (j = 0; j < kCountOfPondWeights; ++j) {
-            r += weights[j] * (2 + sinf(kTau * i * j/kCountOfPondExteriorVertices));
+            r += weights[j] * (2 + sinf(3.0 * i * j * kTau/kCountOfPondExteriorVertices));
         }
-        x = kPondWeightMultiplier * r * sinf(kTau * i / kCountOfPondExteriorVertices);
-        z = kPondWeightMultiplier * r * cosf(kTau * i / kCountOfPondExteriorVertices);
+        x = kPondWeightModerator * r * sinf(kTau * i / kCountOfPondExteriorVertices);
+        z = kPondWeightModerator * r * cosf(kTau * i / kCountOfPondExteriorVertices);
         vertPtr->x = x;
         vertPtr->y = 0;
         vertPtr->z = z;
@@ -1234,7 +1235,7 @@ static void setupTrees(snow_configuration *bp)
     for (int i = 0; i < countOfTreeGroups; ++i) {
         Vert3d *pondVertex = bp->pondInfo.vertAry + i * countOfPondVertices / countOfTreeGroups + 1;
         GLfloat d = sqrtf(pondVertex->x * pondVertex->x + pondVertex->z * pondVertex->z);
-        GLfloat treeDistance = d * 0.75 + kUniverseEdgeRadius * 0.25;
+        GLfloat treeDistance = d * 0.85 + kUniverseEdgeRadius * 0.15;
         Vert3d location;
         Vert3d tempLocation;
         
@@ -1246,16 +1247,16 @@ static void setupTrees(snow_configuration *bp)
         
         if (i % 2) {
             tempLocation = location;
-            tempLocation.x += 0.2 * tempLocation.x + 0.1 * tempLocation.z;
-            tempLocation.z += 0.2 * tempLocation.z - 0.1 * tempLocation.x;
+            tempLocation.x += 0.3 * tempLocation.x + 0.2 * tempLocation.z;
+            tempLocation.z += 0.3 * tempLocation.z - 0.1 * tempLocation.x;
             initTree(tree, &tempLocation, 12, 5);
             ++tree;
         }
         
         if (i % 4 > 1) {
             tempLocation = location;
-            tempLocation.x += 0.2 * tempLocation.x - 0.1 * tempLocation.z;
-            tempLocation.z += 0.3 * tempLocation.z + 0.2 * tempLocation.x;
+            tempLocation.x += 0.3 * tempLocation.x - 0.1 * tempLocation.z;
+            tempLocation.z += 0.4 * tempLocation.z + 0.3 * tempLocation.x;
             initTree(tree, &tempLocation, 14, 5);
             ++tree;
         }
