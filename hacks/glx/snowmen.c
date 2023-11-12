@@ -96,7 +96,7 @@ const GLfloat kHillsHeight = 20;
 #define kCountOfHatSlices 16
 #define kCountOfTreeSkirts 6
 
-#define kCountOfPondExteriorVertices 90
+#define kCountOfPondExteriorVertices 160
 #define kCountOfPondWeights 11
 
 
