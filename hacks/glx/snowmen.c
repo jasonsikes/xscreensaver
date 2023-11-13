@@ -110,7 +110,7 @@ const unsigned kCountOfTreeTrunkSlices = 8;
 #define kColorCarrot 1, 0.35, 0, 1
 #define kColorSkate 0.5, 0.5, 0.5, 1.0
 #define kColorSnowmanArm 0.43, 0.22, 0.08, 1
-#define kColorIce 0.6, 0.8, 0.9, 0.3
+#define kColorIce 0.6, 0.8, 0.9, 0.8
 #define kColorTreeTrunk 0.2, 0.2, 0, 1
 #define kColorInkOutline 0, 0, 0, 1
 
@@ -1487,9 +1487,6 @@ init_snow (ModeInfo *mi)
     
     bp->cameraRho = kPi;
     bp->snowmanRho = 0;
-    bp->cullingFaceFront = GL_FRONT;
-    bp->cullingFaceBack = GL_BACK;
-    bp->isDrawingShadows = False;
 
     setupSnowmen(bp);
     
@@ -1745,7 +1742,6 @@ static void drawHills(snow_configuration *bp)
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
     glCullFace(bp->cullingFaceBack);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDHills] );
     glBindBuffer( GL_ARRAY_BUFFER,   bp->bufferID[hillsTexID] );
@@ -1917,10 +1913,10 @@ draw_snow (ModeInfo *mi)
     
     glShadeModel(GL_FLAT);
     glClearColor( kColorSky );
-    glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
-    
+    glEnable(GL_DEPTH_TEST);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     glMatrixMode( GL_MODELVIEW );
@@ -1931,10 +1927,28 @@ draw_snow (ModeInfo *mi)
     
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    
-    drawObjectsForStage(bp, drawingStageIDReal);
+
+    bp->cullingFaceFront = GL_FRONT;
+    bp->cullingFaceBack = GL_BACK;
+    bp->isDrawingShadows = False;
+
+    drawIce(bp);
+
+    // Draw the reflections on the pond surface
+    bp->cullingFaceFront = GL_BACK;
+    bp->cullingFaceBack = GL_FRONT;
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glScalef(1, -1, 1); // Inverse for reflection
+    drawObjectsForStage(bp, drawingStageIDReflection);
+    glScalef(1, -1, 1); // Reorient upward
+    bp->cullingFaceFront = GL_FRONT;
+    bp->cullingFaceBack = GL_BACK;
+
+    // Draw the ice again. I know it seems redundant, but this looks better to me when doing reflections.
     drawIce(bp);
     
+    drawObjectsForStage(bp, drawingStageIDReal);
+
     glXSwapBuffers(dpy, window);
 }
 
