@@ -85,7 +85,7 @@ const GLfloat kShoreHeight = 1;
 const GLfloat kHillsHeight = 20;
 
 #define kHatTranslateOutline 0, 0.04, 0
-#define kHatScaleOutline 1.2, 1.8, 1.2
+#define kHatScaleOutline 1.15, 1.6, 1.15
 #define kHatScaleStem 1.08, 1.05/1.8, 1.08
 
 #define kCountOfSnowmen 9
@@ -109,7 +109,7 @@ const unsigned kCountOfTreeTrunkSlices = 8;
 #define kColorSnow 1, 0.98, 0.98, 1
 #define kColorCarrot 1, 0.35, 0, 1
 #define kColorSkate 0.5, 0.5, 0.5, 1.0
-#define kColorSnowmanArm 0.63, 0.32, 0.18, 1
+#define kColorSnowmanArm 0.43, 0.22, 0.08, 1
 #define kColorIce 0.6, 0.8, 0.9, 0.3
 #define kColorTreeTrunk 0.2, 0.2, 0, 1
 #define kColorInkOutline 0, 0, 0, 1
@@ -150,6 +150,7 @@ typedef struct {
 // For the hat
 typedef struct {
     Vert3d *vertAry;
+    Vert3d *outlineVertAry;
     GLuint *indexAry;
     void *brimBottomTriangleFanIndices;
     GLuint countOfBrimBottomTriangleFanIndices;
@@ -195,6 +196,7 @@ typedef enum {
     
     // Hat
     hatCoordID,
+    hatOutlineCoordID,
     hatIndicesID,
     
     // Arm
@@ -865,18 +867,29 @@ static void createHatBufferObjects(snow_configuration *bp)
     const GLfloat STEM_BOTTOM_RADIUS = 0.5;
     const GLfloat STEM_BOTTOM_Y = 0.05;
     const GLfloat STEM_TOP_Y = 1.2;
-    
+
+    const GLfloat OUTLINE = 0.05;
+    const GLfloat OUTLINE_BRIM_RADIUS = BRIM_RADIUS + OUTLINE;
+    const GLfloat OUTLINE_BRIM_BOTTOM_Y = BRIM_BOTTOM_Y - OUTLINE;
+    const GLfloat OUTLINE_BRIM_TOP_Y = BRIM_TOP_Y + OUTLINE;
+    const GLfloat OUTLINE_STEM_TOP_RADIUS = STEM_TOP_RADIUS + OUTLINE;
+    const GLfloat OUTLINE_STEM_BOTTOM_RADIUS = STEM_BOTTOM_RADIUS + OUTLINE;
+    const GLfloat OUTLINE_STEM_BOTTOM_Y = STEM_BOTTOM_Y + OUTLINE;
+    const GLfloat OUTLINE_STEM_TOP_Y = STEM_TOP_Y + OUTLINE;
+
     int i;
     unsigned vertexIter = 0;
     unsigned indexIter = 0;
     unsigned countOfVertices = kCountOfHatSlices * 4;
     unsigned countOfIndices = kCountOfHatSlices * 7 + 4;
     
-    bp->hatInfo.vertAry = (Vert3d*) malloc( countOfVertices * sizeof(Vert3d) );
-    bp->hatInfo.indexAry = (GLuint*) malloc( countOfIndices * sizeof(GLuint) );
+    bp->hatInfo.vertAry =        (Vert3d*) malloc( countOfVertices * sizeof(Vert3d) );
+    bp->hatInfo.outlineVertAry = (Vert3d*) malloc( countOfVertices * sizeof(Vert3d) );
+    bp->hatInfo.indexAry =       (GLuint*) malloc( countOfIndices * sizeof(GLuint) );
     
-    Vert3d *vertAry = bp->hatInfo.vertAry;
-    GLuint *indexAry = bp->hatInfo.indexAry;
+    Vert3d *vertAry =        bp->hatInfo.vertAry;
+    Vert3d *outlineVertAry = bp->hatInfo.outlineVertAry;
+    GLuint *indexAry =       bp->hatInfo.indexAry;
     
     
     // build the brim bottom triangle fan
@@ -887,6 +900,11 @@ static void createHatBufferObjects(snow_configuration *bp)
         ( vertAry + vertexIter ) -> x = -sinf( kTau * i / kCountOfHatSlices ) * BRIM_RADIUS;
         ( vertAry + vertexIter ) -> y = BRIM_BOTTOM_Y;
         ( vertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * BRIM_RADIUS;
+
+        ( outlineVertAry + vertexIter ) -> x = -sinf( kTau * i / kCountOfHatSlices ) * OUTLINE_BRIM_RADIUS;
+        ( outlineVertAry + vertexIter ) -> y = OUTLINE_BRIM_BOTTOM_Y;
+        ( outlineVertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * OUTLINE_BRIM_RADIUS;
+
         *( indexAry + indexIter ) = vertexIter;
         ++vertexIter;
         ++indexIter;
@@ -900,6 +918,11 @@ static void createHatBufferObjects(snow_configuration *bp)
         ( vertAry + vertexIter ) -> x = sinf( kTau * i / kCountOfHatSlices ) * BRIM_RADIUS;
         ( vertAry + vertexIter ) -> y = BRIM_TOP_Y;
         ( vertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * BRIM_RADIUS;
+
+        ( outlineVertAry + vertexIter ) -> x = sinf( kTau * i / kCountOfHatSlices ) * OUTLINE_BRIM_RADIUS;
+        ( outlineVertAry + vertexIter ) -> y = OUTLINE_BRIM_TOP_Y;
+        ( outlineVertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * OUTLINE_BRIM_RADIUS;
+
         *( indexAry + indexIter ) = vertexIter;
         ++vertexIter;
         ++indexIter;
@@ -928,6 +951,11 @@ static void createHatBufferObjects(snow_configuration *bp)
         ( vertAry + vertexIter ) -> x = sinf( kTau * i / kCountOfHatSlices ) * STEM_TOP_RADIUS;
         ( vertAry + vertexIter ) -> y = STEM_TOP_Y;
         ( vertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * STEM_TOP_RADIUS;
+
+        ( outlineVertAry + vertexIter ) -> x = sinf( kTau * i / kCountOfHatSlices ) * OUTLINE_STEM_TOP_RADIUS;
+        ( outlineVertAry + vertexIter ) -> y = OUTLINE_STEM_TOP_Y;
+        ( outlineVertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * OUTLINE_STEM_TOP_RADIUS;
+
         *( indexAry + indexIter ) = vertexIter;
         ++vertexIter;
         ++indexIter;
@@ -937,6 +965,11 @@ static void createHatBufferObjects(snow_configuration *bp)
         ( vertAry + vertexIter ) -> x = sinf( kTau * i / kCountOfHatSlices ) * STEM_BOTTOM_RADIUS;
         ( vertAry + vertexIter ) -> y = STEM_BOTTOM_Y;
         ( vertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * STEM_BOTTOM_RADIUS;
+
+        ( outlineVertAry + vertexIter ) -> x = sinf( kTau * i / kCountOfHatSlices ) * OUTLINE_STEM_BOTTOM_RADIUS;
+        ( outlineVertAry + vertexIter ) -> y = OUTLINE_STEM_BOTTOM_Y;
+        ( outlineVertAry + vertexIter ) -> z = cosf( kTau * i / kCountOfHatSlices ) * OUTLINE_STEM_BOTTOM_RADIUS;
+
         ++vertexIter;
     }
     
@@ -965,6 +998,12 @@ static void createHatBufferObjects(snow_configuration *bp)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
                  countOfIndices * sizeof(GLuint),
                  indexAry,
+                 GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + hatOutlineCoordID) );
+    glBufferData(GL_ARRAY_BUFFER,
+                 countOfVertices * sizeof(Vert3d),
+                 outlineVertAry,
                  GL_STATIC_DRAW);
 }
 
@@ -1571,7 +1610,7 @@ static void drawSnowball(snow_configuration *bp,
 
 static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
 {
-    const GLfloat HAT_TRANSLATE_HEIGHT = 0.9;
+    const GLfloat HAT_TRANSLATE_HEIGHT = 1.09;
     HatStruct_t *hatInfo  = &(bp->hatInfo);
     
     glEnableClientState(GL_VERTEX_ARRAY);
@@ -1612,12 +1651,11 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
     
     if ( ! bp->isDrawingShadows) {
         glColor4f(kColorInkOutline);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glDisable(GL_TEXTURE_2D);
         
+        glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[hatOutlineCoordID] );
+        glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
+
         glCullFace(bp->cullingFaceFront);
-        glTranslatef(kHatTranslateOutline);
-        glScalef(kHatScaleOutline);
 
         glDrawElements(GL_TRIANGLE_FAN,
                        hatInfo->countOfBrimBottomTriangleFanIndices,
@@ -1631,7 +1669,6 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
                        hatInfo->countOfBrimTriangleStripIndices,
                        GL_UNSIGNED_INT,
                        hatInfo->brimTriangleStripIndices);
-        glScalef(kHatScaleStem);
         glDrawElements(GL_TRIANGLE_FAN,
                        hatInfo->countOfStemTopTriangleFanIndices,
                        GL_UNSIGNED_INT,
@@ -1873,6 +1910,7 @@ free_snow (ModeInfo *mi)
     free(bp->hillsInfo.texAry);
     
     free(bp->hatInfo.vertAry);
+    free(bp->hatInfo.outlineVertAry);
     free(bp->hatInfo.indexAry);
     
     free(bp->treesInfo.vertAry);
