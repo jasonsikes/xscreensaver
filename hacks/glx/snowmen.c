@@ -99,7 +99,7 @@ const GLfloat kHillsHeight = 20;
 #define kCountOfPondExteriorVertices 160
 #define kCountOfPondWeights 11
 
-
+// Caution: texture has outline that is expecting exactly this number
 const unsigned kCountOfTreeSkirtVertices = 16;
 
 const unsigned kCountOfTreeTrunkSlices = 8;
