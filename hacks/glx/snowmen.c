@@ -597,7 +597,8 @@ static void createTreeBufferObjects(snow_configuration *bp)
     const GLfloat treeHeightCenterAdd = 0.26;
     const GLfloat treeHeightAlternateEdgeAdd = 0.06;
     const GLfloat outlineCenterAdd = 0.04;
-    const GLfloat outlineEdgeAdd = 0.04;
+    const GLfloat outlineEdgeAdd = 0.05;
+    const GLfloat outlineEdgeMult = 1.03;
 
     int i;
     int j;
@@ -643,9 +644,9 @@ static void createTreeBufferObjects(snow_configuration *bp)
             vertPtr->y = normalizedHeight + (i & 1) * treeHeightAlternateEdgeAdd * (1.2-normalizedHeight);
             vertPtr->z = edgeRadius * cosf( i * kTau / kCountOfTreeSkirtVertices + rotation);
             ++vertPtr;
-            outlineVertPtr->x = (edgeRadius + outlineEdgeAdd) * sinf( i * kTau / kCountOfTreeSkirtVertices + rotation);
+            outlineVertPtr->x = (edgeRadius * outlineEdgeMult + outlineEdgeAdd) * sinf( i * kTau / kCountOfTreeSkirtVertices + rotation);
             outlineVertPtr->y = normalizedHeight + (i & 1) * treeHeightAlternateEdgeAdd * (1-normalizedHeight);
-            outlineVertPtr->z = (edgeRadius + outlineEdgeAdd) * cosf( i * kTau / kCountOfTreeSkirtVertices + rotation);
+            outlineVertPtr->z = (edgeRadius * outlineEdgeMult + outlineEdgeAdd) * cosf( i * kTau / kCountOfTreeSkirtVertices + rotation);
             ++outlineVertPtr;
             texPtr->x = 0.5 + sinf(i * kTau / kCountOfTreeSkirtVertices) / 2;
             texPtr->y = 0.5 + cosf(i * kTau / kCountOfTreeSkirtVertices) / 2;
