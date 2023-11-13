@@ -94,7 +94,7 @@ const GLfloat kHillsHeight = 20;
 #define kCountOfTrees 27
 
 #define kCountOfHatSlices 16
-#define kCountOfTreeSkirts 6
+#define kCountOfTreeSkirts 5
 
 #define kCountOfPondExteriorVertices 160
 #define kCountOfPondWeights 11
@@ -144,6 +144,7 @@ Vert4d snowmanHatColors[kCountOfSnowmen] = {
 typedef struct {
     unsigned countOfVertices;
     Vert3d *vertAry;
+    Vert3d *outlineVertAry;
     Vert2d *texAry;
 } VertexTextureObject_t;
 
@@ -188,6 +189,7 @@ typedef enum {
     
     // the trees
     treesCoordID,
+    treesOutlineCoordID,
     treesTexID,
     
     // The carrot nose
@@ -592,20 +594,25 @@ static void createTreeBufferObjects(snow_configuration *bp)
     const GLfloat heightOfTrunk = 0.3;
     const GLfloat upperRadiusOfTrunk = 0.11;
     const GLfloat lowerRadiusOfTrunk = 0.15;
-    const GLfloat treeHeightCenterAdd = 0.2;
-    const GLfloat treeHeightAlternateEdgeAdd = 0.1;
-    
+    const GLfloat treeHeightCenterAdd = 0.26;
+    const GLfloat treeHeightAlternateEdgeAdd = 0.06;
+    const GLfloat outlineCenterAdd = 0.04;
+    const GLfloat outlineEdgeAdd = 0.04;
+
     int i;
     int j;
     unsigned countOfTreeFanVertices = (kCountOfTreeSkirtVertices + 2) * kCountOfTreeSkirts;
     unsigned countOfTrunkVertices = (kCountOfTreeTrunkSlices + 1) * 2;
     Vert3d *vertPtr = (Vert3d*) malloc(( countOfTreeFanVertices + countOfTrunkVertices)  * sizeof(Vert3d));
+    Vert3d *outlineVertPtr = (Vert3d*) malloc(countOfTreeFanVertices * sizeof(Vert3d));
     Vert2d *texPtr = (Vert2d*) malloc(countOfTreeFanVertices * sizeof(Vert2d));
     
     bp->treesInfo.vertAry = vertPtr;
+    bp->treesInfo.outlineVertAry = outlineVertPtr;
     bp->treesInfo.texAry = texPtr;
     
     Vert3d *startVert;
+    Vert3d *outlineStartVert;
     Vert2d *startTex;
     
     
@@ -618,19 +625,28 @@ static void createTreeBufferObjects(snow_configuration *bp)
         vertPtr->y = normalizedHeight + treeHeightCenterAdd * (2 - normalizedHeight);
         vertPtr->z = 0;
         ++vertPtr;
+        outlineVertPtr->x = 0;
+        outlineVertPtr->y = normalizedHeight + treeHeightCenterAdd * (2 - normalizedHeight) + outlineCenterAdd;
+        outlineVertPtr->z = 0;
+        ++outlineVertPtr;
         texPtr->x = 0.5;
         texPtr->y = 0.5;
         ++texPtr;
         
         startVert = vertPtr;
+        outlineStartVert = outlineVertPtr;
         startTex = texPtr;
         
-        GLfloat edgeRadius = 1 - normalizedHeight;
+        GLfloat edgeRadius = 1.0 - j/(1.0*kCountOfTreeSkirts);
         for (i = 0; i < kCountOfTreeSkirtVertices; ++i) {
             vertPtr->x = edgeRadius * sinf( i * kTau / kCountOfTreeSkirtVertices + rotation);
-            vertPtr->y = normalizedHeight + (i & 1) * treeHeightAlternateEdgeAdd * (1-normalizedHeight);
+            vertPtr->y = normalizedHeight + (i & 1) * treeHeightAlternateEdgeAdd * (1.2-normalizedHeight);
             vertPtr->z = edgeRadius * cosf( i * kTau / kCountOfTreeSkirtVertices + rotation);
             ++vertPtr;
+            outlineVertPtr->x = (edgeRadius + outlineEdgeAdd) * sinf( i * kTau / kCountOfTreeSkirtVertices + rotation);
+            outlineVertPtr->y = normalizedHeight + (i & 1) * treeHeightAlternateEdgeAdd * (1-normalizedHeight);
+            outlineVertPtr->z = (edgeRadius + outlineEdgeAdd) * cosf( i * kTau / kCountOfTreeSkirtVertices + rotation);
+            ++outlineVertPtr;
             texPtr->x = 0.5 + sinf(i * kTau / kCountOfTreeSkirtVertices) / 2;
             texPtr->y = 0.5 + cosf(i * kTau / kCountOfTreeSkirtVertices) / 2;
             ++texPtr;
@@ -639,6 +655,8 @@ static void createTreeBufferObjects(snow_configuration *bp)
         // Complete the circle
         *vertPtr = *startVert;
         ++vertPtr;
+        *outlineVertPtr = *outlineStartVert;
+        ++outlineVertPtr;
         *texPtr = *startTex;
         ++texPtr;
     } // /for j
@@ -665,6 +683,12 @@ static void createTreeBufferObjects(snow_configuration *bp)
                  bp->treesInfo.vertAry,
                  GL_STATIC_DRAW);
     
+    glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + treesOutlineCoordID) );
+    glBufferData(GL_ARRAY_BUFFER,
+                 countOfTreeFanVertices  * sizeof(Vert3d),
+                 bp->treesInfo.outlineVertAry,
+                 GL_STATIC_DRAW);
+
     glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + treesTexID) );
     glBufferData(GL_ARRAY_BUFFER,
                  countOfTreeFanVertices * sizeof(Vert2d),
@@ -1756,16 +1780,41 @@ static void drawTree(snow_configuration *bp, TreeState_t *state)
     glRotatef( rotation, 0, 1, 0 );
     glColor4f(1, 1, 1, 1);
     
+    glDisable(GL_CULL_FACE);
     for (int i = 0; i < kCountOfTreeSkirts; ++i) {
         glDrawArrays( GL_TRIANGLE_FAN,
                      i * (kCountOfTreeSkirtVertices + 2),
                      kCountOfTreeSkirtVertices + 2 );
     }
-    glDisable( GL_TEXTURE_2D );
-    
+    glEnable(GL_CULL_FACE);
+
     // draw the tree trunk
+    glDisable( GL_TEXTURE_2D );
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
     glColor4f( kColorTreeTrunk );
 
+    glDrawArrays( GL_TRIANGLE_STRIP,
+                 kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
+                 (kCountOfTreeTrunkSlices + 1) * 2);
+
+    // Tree skirts outline
+    glColor4f(kColorInkOutline);
+    glCullFace(bp->cullingFaceFront);
+
+    glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesOutlineCoordID]);
+    glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
+
+    for (int i = 0; i < kCountOfTreeSkirts; ++i) {
+        glDrawArrays( GL_TRIANGLE_FAN,
+                     i * (kCountOfTreeSkirtVertices + 2),
+                     kCountOfTreeSkirtVertices + 2 );
+    }
+
+    // tree trunk outline
+    glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesCoordID]);
+    glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
+    glScalef(1.3, 1.1, 1.3);
     glDrawArrays( GL_TRIANGLE_STRIP,
                  kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
                  (kCountOfTreeTrunkSlices + 1) * 2);
@@ -1914,6 +1963,7 @@ free_snow (ModeInfo *mi)
     free(bp->hatInfo.indexAry);
     
     free(bp->treesInfo.vertAry);
+    free(bp->treesInfo.outlineVertAry);
     free(bp->treesInfo.texAry);
     
     glDeleteBuffers(countOfVboIDs, bp->bufferID);
