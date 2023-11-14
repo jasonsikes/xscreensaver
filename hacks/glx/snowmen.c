@@ -113,6 +113,7 @@ const unsigned kCountOfTreeTrunkSlices = 8;
 #define kColorIce 0.6, 0.8, 0.9, 0.8
 #define kColorTreeTrunk 0.2, 0.2, 0, 1
 #define kColorInkOutline 0, 0, 0, 1
+#define kColorShadow  0, 0, 0, 0.1
 
 Vert4d snowmanHatColors[kCountOfSnowmen] = {
     {
@@ -317,6 +318,7 @@ static void drawIce(snow_configuration *bp);
 static void drawShore(snow_configuration *bp);
 static void drawHills(snow_configuration *bp);
 static void drawTree(snow_configuration *bp, TreeState_t *state);
+static void setShadowMatrix(void);
 
 
 
@@ -1463,8 +1465,6 @@ reshape_snow (ModeInfo *mi, int width, int height)
     glLoadIdentity();
     gluPerspective( kCameraPerspectiveAngle, proportionWidthToHeight,
                    kHither, kYon );
-    
-    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 
@@ -1504,12 +1504,44 @@ init_snow (ModeInfo *mi)
  *
  *************************************************/
 
+/* setShadowMatrix()
+ * From Improving Shadows and Reflections via the Stencil Buffer
+ * Mark J. Kilgard
+ * NVIDIA Corporation
+ */
+static void setShadowMatrix(void)
+{
+    GLfloat light[4] = { 0, 1, 1.1, 0 };
+    GLfloat plane[4] = { 0, 10, 0, 0 };
+
+    GLfloat m[4][4];
+
+    GLfloat dot = plane[0]*light[0] + plane[1]*light[1] + plane[2]*light[2] + plane[3]*light[3];
+    m[0][0] = dot - light[0]*plane[0];
+    m[1][0] =     - light[0]*plane[1];
+    m[2][0] =     - light[0]*plane[2];
+    m[3][0] =     - light[0]*plane[3];
+    m[0][1] =     - light[1]*plane[0];
+    m[1][1] = dot - light[1]*plane[1];
+    m[2][1] =     - light[1]*plane[2];
+    m[3][1] =     - light[1]*plane[3];
+    m[0][2] =     - light[2]*plane[0];
+    m[1][2] =     - light[2]*plane[1];
+    m[2][2] = dot - light[2]*plane[2];
+    m[3][2] =     - light[2]*plane[3];
+    m[0][3] =     - light[3]*plane[0];
+    m[1][3] =     - light[3]*plane[1];
+    m[2][3] =     - light[3]*plane[2];
+    m[3][3] = dot - light[3]*plane[3];
+    glMultMatrixf( &m[0][0] );
+}
+
+
 // draw a skate.
 // isOnLeft = YES: draw on the left.
 // isOnLeft = NO: draw on right
 static void drawSkate(snow_configuration *bp, Bool isOnLeft)
 {
-    glColor4f( kColorSkate );
     glPushMatrix();
     
     glCullFace(bp->cullingFaceBack);
@@ -1521,7 +1553,12 @@ static void drawSkate(snow_configuration *bp, Bool isOnLeft)
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[skateCoordID]);
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[skateIndicesID]);
-    
+
+    if (bp->isDrawingShadows) {
+        glColor4f(kColorShadow);
+    } else {
+        glColor4f(kColorSkate);
+    }
     if ( isOnLeft ) {
         glTranslatef( kSkateLateralDistance, kSkateHeight, kSkateVentralDistance );
     } else {
@@ -1548,7 +1585,11 @@ static void drawArms(snow_configuration *bp)
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[armIndicesID]);
 
-    glColor4f( kColorSnowmanArm );
+    if (bp->isDrawingShadows) {
+        glColor4f(kColorShadow);
+    } else {
+        glColor4f(kColorSnowmanArm);
+    }
 
     for ( int i = 0; i < 2; ++i ) {
         glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_INT, (void*) 0);
@@ -1578,7 +1619,11 @@ static void drawCarrot(snow_configuration *bp, GLfloat radius)
     glScalef( radius, radius, radius );
     glTranslatef( 0, 0, radius * kCarrotScaleDivide );
 
-    glColor4f(kColorInkOutline);
+    if (bp->isDrawingShadows) {
+        glColor4f(kColorShadow);
+    } else {
+        glColor4f(kColorInkOutline);
+    }
     glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_INT, (void*) 0);
     glDrawElements(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, (void*) (18 * sizeof(GLuint)));
     glDrawElements(GL_TRIANGLE_FAN, 8, GL_UNSIGNED_INT, (void*)  (28 * sizeof(GLuint)));
@@ -1604,29 +1649,30 @@ static void drawSnowball(snow_configuration *bp,
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
     glCullFace(bp->cullingFaceBack);
-
-    glEnable( GL_TEXTURE_2D );
-    glBindTexture( GL_TEXTURE_2D, texture );
-    glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[snowballTexID] );
-    glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
+    glPushMatrix();
+    glScalef(radius, radius, radius);
 
     glBindBuffer(GL_ARRAY_BUFFER, bp->bufferID[snowballCoordID]);
     glVertexPointer(3, GL_FLOAT, 0, (GLvoid*) 0);
-    
-    glColor4f( kColorSnow );
-    glPushMatrix();
-    glScalef(radius, radius, radius);
-    glDrawArrays(GL_TRIANGLES, 0, bp->snowballAry.countOfVertices);
-    
-    glDisable( GL_TEXTURE_2D );
+
+    glColor4f(kColorShadow);
     if ( ! bp->isDrawingShadows) {
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-        glScalef(outlineRadius / radius, outlineRadius / radius, outlineRadius / radius);
-        glColor4f(kColorInkOutline);
-        glCullFace(bp->cullingFaceFront);
+        glEnable( GL_TEXTURE_2D );
+        glBindTexture( GL_TEXTURE_2D, texture );
+        glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[snowballTexID] );
+        glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
+
+        glColor4f( kColorSnow );
         glDrawArrays(GL_TRIANGLES, 0, bp->snowballAry.countOfVertices);
+        glColor4f(kColorInkOutline);
     }
     
+    glDisable( GL_TEXTURE_2D );
+    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    glScalef(outlineRadius / radius, outlineRadius / radius, outlineRadius / radius);
+    glCullFace(bp->cullingFaceFront);
+    glDrawArrays(GL_TRIANGLES, 0, bp->snowballAry.countOfVertices);
+
     glPopMatrix();
 }
 
@@ -1645,7 +1691,11 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[hatIndicesID]);
 
-    glColor4f( hatColor->x, hatColor->y, hatColor->z, hatColor->w );
+    if (bp->isDrawingShadows) {
+        glColor4f(kColorShadow);
+    } else {
+        glColor4f( hatColor->x, hatColor->y, hatColor->z, hatColor->w );
+    }
 
     glTranslatef( 0.0, radius * HAT_TRANSLATE_HEIGHT, 0.0 );
     glScalef( radius, radius, radius );
@@ -1708,7 +1758,7 @@ static void drawIce(snow_configuration *bp)
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
-    glCullFace(bp->cullingFaceBack);
+    glDepthMask(GL_FALSE);
     glEnable( GL_TEXTURE_2D );
     glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDIce] );
     glBindBuffer( GL_ARRAY_BUFFER,   bp->bufferID[pondTexID] );
@@ -1716,6 +1766,7 @@ static void drawIce(snow_configuration *bp)
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[pondCoordID] );
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     glDrawArrays( GL_TRIANGLE_FAN, 0, bp->pondInfo.countOfVertices );
+    glDepthMask(GL_TRUE);
 }
 
 
@@ -1898,7 +1949,7 @@ draw_snow (ModeInfo *mi)
     
     if (!bp->glx_context)
         return;
-    
+
     // Update camera and snowmen
     bp->cameraRho += kDCameraRho;
     if (bp->cameraRho > kTau) bp->cameraRho -= kTau;
@@ -1914,11 +1965,12 @@ draw_snow (ModeInfo *mi)
     
     glShadeModel(GL_FLAT);
     glClearColor( kColorSky );
+    glClearStencil(1);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
     
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
@@ -1938,7 +1990,6 @@ draw_snow (ModeInfo *mi)
     // Draw the reflections on the pond surface
     bp->cullingFaceFront = GL_BACK;
     bp->cullingFaceBack = GL_FRONT;
-    glClear(GL_DEPTH_BUFFER_BIT);
     glScalef(1, -1, 1); // Inverse for reflection
     drawObjectsForStage(bp, drawingStageIDReflection);
     glScalef(1, -1, 1); // Reorient upward
@@ -1948,6 +1999,23 @@ draw_snow (ModeInfo *mi)
     // Draw the ice again. I know it seems redundant, but this looks better to me when doing reflections.
     drawIce(bp);
     
+    // Draw shadows
+    bp->isDrawingShadows = True;
+    glDepthMask(GL_FALSE);
+    glPushMatrix();
+    setShadowMatrix();
+
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc( GL_EQUAL, 1, 1 );
+    glStencilOp( GL_KEEP, GL_KEEP, GL_ZERO );
+
+    drawObjectsForStage(bp, drawingStageIDShadow);
+    glDisable(GL_STENCIL_TEST);
+    glDepthMask(GL_TRUE);
+    glPopMatrix();
+
+    // Draw everything that is real
+    bp->isDrawingShadows = False;
     drawObjectsForStage(bp, drawingStageIDReal);
 
     glXSwapBuffers(dpy, window);

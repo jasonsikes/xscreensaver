@@ -186,6 +186,7 @@ extern void check_gl_error (const char *type);
   attrs[i++] = NSOpenGLPFAColorSize; attrs[i++] = 24;
   attrs[i++] = NSOpenGLPFAAlphaSize; attrs[i++] = 8;
   attrs[i++] = NSOpenGLPFADepthSize; attrs[i++] = 24;
+    attrs[i++] = NSOpenGLPFAStencilSize; attrs[i++] = 8;
 
   if ([prefsReader getBooleanResource:"doubleBuffer"])
     attrs[i++] = NSOpenGLPFADoubleBuffer;
