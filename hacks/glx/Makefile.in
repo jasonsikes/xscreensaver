@@ -739,8 +739,8 @@ dangerball:	dangerball.o	$(DB_OBJS)
 circuit:	circuit.o	$(HACK_OBJS)
 	$(CC_HACK) -o $@ $@.o   $(HACK_OBJS) $(HACK_LIBS)
 
-snowmen:	snowmen.o	$(HACK_OBJS)
-	$(CC_HACK) -o $@ $@.o   $(HACK_OBJS) $(HACK_LIBS)
+snowmen:	snowmen.o	$(HACK_OBJS) $(PNG)
+	$(CC_HACK) -o $@ $@.o   $(HACK_OBJS) $(PNG) $(HACK_LIBS) $(PNG_LIBS)
 
 menger:		menger.o	$(HACK_TRACK_OBJS)
 	$(CC_HACK) -o $@ $@.o   $(HACK_TRACK_OBJS) $(HACK_LIBS)
@@ -4170,6 +4170,7 @@ snowmen.o: $(UTILS_SRC)/usleep.h
 snowmen.o: $(UTILS_SRC)/visual.h
 snowmen.o: $(UTILS_SRC)/xft.h
 snowmen.o: $(UTILS_SRC)/yarandom.h
+snowmen.o: $(HACK_SRC)/ximage-loader.h
 snowmen.o: $(HACK_SRC)/xlockmoreI.h
 snowmen.o: $(HACK_SRC)/xlockmore.h
 sonar-icmp.o: ../../config.h
