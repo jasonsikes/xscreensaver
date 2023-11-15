@@ -1315,16 +1315,16 @@ static void setupTrees(snow_configuration *bp)
         
         if (i % 2) {
             tempLocation = location;
-            tempLocation.x += 0.3 * tempLocation.x + 0.2 * tempLocation.z;
-            tempLocation.z += 0.3 * tempLocation.z - 0.1 * tempLocation.x;
+            tempLocation.x += 0.5 * location.x + 0.2 * location.z;
+            tempLocation.z += 0.5 * location.z - 0.1 * location.x;
             initTree(tree, &tempLocation, 12, 5);
             ++tree;
         }
         
         if (i % 4 > 1) {
             tempLocation = location;
-            tempLocation.x += 0.3 * tempLocation.x - 0.1 * tempLocation.z;
-            tempLocation.z += 0.4 * tempLocation.z + 0.3 * tempLocation.x;
+            tempLocation.x += 0.5 * location.x - 0.1 * location.z;
+            tempLocation.z += 0.7 * location.z + 0.3 * location.x;
             initTree(tree, &tempLocation, 14, 5);
             ++tree;
         }
