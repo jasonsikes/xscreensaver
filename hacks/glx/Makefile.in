@@ -147,7 +147,7 @@ SRCS		= xscreensaver-gl-visual.c normals.c erase-gl.c fps-gl.c \
 		  sphereeversion-corrugations.c \
 		  mapscroller.c squirtorus.c nakagin.c chompytower.c \
 		  teeth_model.c hextrail.c papercube.c cubocteversion.c \
-		  skulloop.c
+		  skulloop.c snowmen.c
 
 SCRIPTS		= mapscroller.pl
 
@@ -203,7 +203,7 @@ OBJS		= xscreensaver-gl-visual.o normals.o erase-gl.o fps-gl.o \
 		  sphereeversion-corrugations.c \
 		  mapscroller.o squirtorus.o nakagin.o chompytower.o \
 		  teeth_model.o hextrail.o papercube.o cubocteversion.o \
-		  skulloop.o
+		  skulloop.o snowmen.o
 
 GL_EXES		= cage gears moebius pipes sproingies stairs superquadrics \
 		  morph3d rubik atlantis lament bubble3d glplanet pulsar \
@@ -227,7 +227,7 @@ GL_EXES		= cage gears moebius pipes sproingies stairs superquadrics \
 		  maze3d handsy gravitywell deepstars gibson etruscanvenus \
 		  sphereeversion covid19 headroom beats mapscroller \
 		  squirtorus nakagin chompytower hextrail papercube \
-		  cubocteversion skulloop
+		  cubocteversion skulloop snowmen
 GLE_EXES	= extrusion
 SUID_EXES	= sonar
 SETCAP_EXES	= sonar
@@ -737,6 +737,9 @@ dangerball:	dangerball.o	$(DB_OBJS)
 	$(CC_HACK) -o $@ $@.o	$(DB_OBJS) $(HACK_LIBS)
 
 circuit:	circuit.o	$(HACK_OBJS)
+	$(CC_HACK) -o $@ $@.o   $(HACK_OBJS) $(HACK_LIBS)
+
+snowmen:	snowmen.o	$(HACK_OBJS)
 	$(CC_HACK) -o $@ $@.o   $(HACK_OBJS) $(HACK_LIBS)
 
 menger:		menger.o	$(HACK_TRACK_OBJS)
@@ -4152,6 +4155,23 @@ skytentacles.o: $(UTILS_SRC)/yarandom.h
 skytentacles.o: $(HACK_SRC)/ximage-loader.h
 skytentacles.o: $(HACK_SRC)/xlockmoreI.h
 skytentacles.o: $(HACK_SRC)/xlockmore.h
+snowmen.o: ../../config.h
+snowmen.o: $(HACK_SRC)/fps.h
+snowmen.o: $(HACK_SRC)/recanim.h
+snowmen.o: $(HACK_SRC)/screenhackI.h
+snowmen.o: $(srcdir)/snowmen_textures.h
+snowmen.o: $(UTILS_SRC)/colors.h
+snowmen.o: $(UTILS_SRC)/erase.h
+snowmen.o: $(UTILS_SRC)/font-retry.h
+snowmen.o: $(UTILS_SRC)/grabclient.h
+snowmen.o: $(UTILS_SRC)/hsv.h
+snowmen.o: $(UTILS_SRC)/resources.h
+snowmen.o: $(UTILS_SRC)/usleep.h
+snowmen.o: $(UTILS_SRC)/visual.h
+snowmen.o: $(UTILS_SRC)/xft.h
+snowmen.o: $(UTILS_SRC)/yarandom.h
+snowmen.o: $(HACK_SRC)/xlockmoreI.h
+snowmen.o: $(HACK_SRC)/xlockmore.h
 sonar-icmp.o: ../../config.h
 sonar-icmp.o: $(HACK_SRC)/fps.h
 sonar-icmp.o: $(HACK_SRC)/recanim.h

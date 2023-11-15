@@ -272,6 +272,7 @@
 				xrayswarm --root			    \\n\
 				xspirograph --root			    \\n\
   GL: 				circuit --root				    \\n\
+  GL: 				snowmen --root			    \\n\
   GL: 				dangerball --root			    \\n\
 - GL: 				dnalogo --root				    \\n\
   GL: 				engine --root				    \\n\
@@ -528,6 +529,7 @@
 "*hacks.sierpinski3d.name:   Sierpinski 3D",
 "*hacks.skytentacles.name:   Sky Tentacles",
 "*hacks.slidescreen.name:    Slide Screen",
+"*hacks.snowmen.name:        Snowmen",
 "*hacks.speedmine.name:      Speed Mine",
 "*hacks.sphereeversion.name: Sphere Eversion",
 "*hacks.splitflap.name:      Split-Flap",

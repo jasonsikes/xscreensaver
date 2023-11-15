@@ -419,6 +419,7 @@ XScreenSaver.bourneShell:		/bin/sh
 				xspirograph --root			    \n\
 @GL_KLUDGE@ GL: 				circuit --root				    \n\
 @GL_KLUDGE@ GL: 				dangerball --root			    \n\
+@GL_KLUDGE@ GL: 				snowmen --root			    \n\
 - GL: 				dnalogo --root				    \n\
 @GL_KLUDGE@ GL: 				engine --root				    \n\
 @GL_KLUDGE@ GL: 				flipscreen3d --root			    \n\
@@ -684,6 +685,7 @@ XScreenSaver.bourneShell:		/bin/sh
 *hacks.sierpinski3d.name:   Sierpinski 3D
 *hacks.skytentacles.name:   Sky Tentacles
 *hacks.slidescreen.name:    Slide Screen
+*hacks.snowmen.name:        Snowmen
 *hacks.speedmine.name:      Speed Mine
 *hacks.sphereeversion.name: Sphere Eversion
 *hacks.splitflap.name:      Split-Flap
