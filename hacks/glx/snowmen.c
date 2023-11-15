@@ -46,7 +46,7 @@ const GLfloat kTau = 2.0 * kPi;
 
 const GLdouble kCameraPerspectiveAngle = 45;
 //const GLfloat kCameraRadius = 68;
-//const GLfloat kCameraHeight = 500;
+//const GLfloat kCameraHeight = 400;
 const GLdouble kCameraRadius = 28;
 const GLdouble kCameraHeight = 7;
 
@@ -317,8 +317,10 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius);
 static void drawIce(snow_configuration *bp);
 static void drawShore(snow_configuration *bp);
 static void drawHills(snow_configuration *bp);
+static void drawTrees(snow_configuration *bp);
+static void drawSnowmen(snow_configuration *bp);
 static void drawTree(snow_configuration *bp, TreeState_t *state);
-static void setShadowMatrix(void);
+static void setShadowMatrix(Bool isDrawingShore);
 
 
 
@@ -1486,7 +1488,7 @@ init_snow (ModeInfo *mi)
     
     reshape_snow (mi, MI_WIDTH(mi), MI_HEIGHT(mi));
     
-    bp->cameraRho = kPi;
+    bp->cameraRho = kPi/2;
     bp->snowmanRho = 0;
 
     setupSnowmen(bp);
@@ -1509,12 +1511,19 @@ init_snow (ModeInfo *mi)
  * Mark J. Kilgard
  * NVIDIA Corporation
  */
-static void setShadowMatrix(void)
+// The following routine shadowMatrix constructs a 4x4 matrix and passes it to
+// glMultMatrixf() which projects coordinates onto either
+// isDrawingShore=False: the pond surface plane or
+// isDrawingShore=True: the shore surface plane.
+static void setShadowMatrix(Bool isDrawingShore)
 {
-    GLfloat light[4] = { 0, 1, 1.1, 0 };
-    GLfloat plane[4] = { 0, 10, 0, 0 };
+    static GLfloat light[4] = { 0, 1, 1.1, 0 };
+    static GLfloat shorePlane[4] = { 0, 1, 0, -kShoreHeight };
+    static GLfloat pondPlane[4] = { 0, 1, 0, 0 };
 
     GLfloat m[4][4];
+    
+    GLfloat *plane = isDrawingShore ? shorePlane : pondPlane;
 
     GLfloat dot = plane[0]*light[0] + plane[1]*light[1] + plane[2]*light[2] + plane[3]*light[3];
     m[0][0] = dot - light[0]*plane[0];
@@ -1810,23 +1819,28 @@ static void drawTree(snow_configuration *bp, TreeState_t *state)
     Vert3d location = state->location;
     GLfloat height = state->height;
     GLfloat rotation = state->rotation;
-    
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    glEnable( GL_TEXTURE_2D );
 
-    glPushMatrix();
-    glCullFace(bp->cullingFaceBack);
-    glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDTrees]);
-    glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesTexID]);
-    glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
+    glEnableClientState(GL_VERTEX_ARRAY);
+
+    if ( ! bp->isDrawingShadows) {
+        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+        glEnable( GL_TEXTURE_2D );
+        glBindTexture( GL_TEXTURE_2D, bp->textureID[kTextureIDTrees]);
+        glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesTexID]);
+        glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
+        glColor4f(1, 1, 1, 1);
+    } else {
+        glColor4f(kColorShadow);
+    }
+
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesCoordID]);
     glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
     
+    glPushMatrix();
+
     glTranslatef( location.x, location.y, location.z );
     glScalef( radius, height, radius );
     glRotatef( rotation, 0, 1, 0 );
-    glColor4f(1, 1, 1, 1);
     
     glDisable(GL_CULL_FACE);
     for (int i = 0; i < kCountOfTreeSkirts; ++i) {
@@ -1836,36 +1850,41 @@ static void drawTree(snow_configuration *bp, TreeState_t *state)
     }
     glEnable(GL_CULL_FACE);
 
-    // draw the tree trunk
-    glDisable( GL_TEXTURE_2D );
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
-    glColor4f( kColorTreeTrunk );
-
-    glDrawArrays( GL_TRIANGLE_STRIP,
-                 kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
-                 (kCountOfTreeTrunkSlices + 1) * 2);
-
-    // Tree skirts outline
-    glColor4f(kColorInkOutline);
-    glCullFace(bp->cullingFaceFront);
-
-    glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesOutlineCoordID]);
-    glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
-
-    for (int i = 0; i < kCountOfTreeSkirts; ++i) {
-        glDrawArrays( GL_TRIANGLE_FAN,
-                     i * (kCountOfTreeSkirtVertices + 2),
-                     kCountOfTreeSkirtVertices + 2 );
+    // The tree skirt shadows cover the tree trunk shadows.
+    // So don't bother rendering the tree trunk shadows
+    if ( ! bp->isDrawingShadows) {
+        
+        // draw the tree trunk
+        glDisable( GL_TEXTURE_2D );
+        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+        
+        glColor4f( kColorTreeTrunk );
+        
+        glDrawArrays( GL_TRIANGLE_STRIP,
+                     kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
+                     (kCountOfTreeTrunkSlices + 1) * 2);
+        
+        // Tree skirts outline
+        glColor4f(kColorInkOutline);
+        glCullFace(bp->cullingFaceFront);
+        
+        glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesOutlineCoordID]);
+        glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
+        
+        for (int i = 0; i < kCountOfTreeSkirts; ++i) {
+            glDrawArrays( GL_TRIANGLE_FAN,
+                         i * (kCountOfTreeSkirtVertices + 2),
+                         kCountOfTreeSkirtVertices + 2 );
+        }
+        
+        // tree trunk outline
+        glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesCoordID]);
+        glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
+        glScalef(1.3, 1.1, 1.3);
+        glDrawArrays( GL_TRIANGLE_STRIP,
+                     kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
+                     (kCountOfTreeTrunkSlices + 1) * 2);
     }
-
-    // tree trunk outline
-    glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesCoordID]);
-    glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
-    glScalef(1.3, 1.1, 1.3);
-    glDrawArrays( GL_TRIANGLE_STRIP,
-                 kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
-                 (kCountOfTreeTrunkSlices + 1) * 2);
 
     glPopMatrix();
     
@@ -1922,23 +1941,21 @@ static void drawSnowman(snow_configuration *bp, SnowmanState_t *state)
 }
 
 
-static void drawObjectsForStage(snow_configuration *bp, DrawingStageID_t stage)
+static void drawTrees(snow_configuration *bp)
 {
-    int i;
-    switch (stage) {
-        case drawingStageIDReal: // Things that don't have a shadow or reflection (out of range)
-            drawHills(bp);
-        case drawingStageIDReflection: // Things that have a reflection
-            drawShore(bp);
-            for (i = 0; i < kCountOfTrees; ++i) {
-                drawTree(bp, bp->treeIndividual + i);
-            }
-        case drawingStageIDShadow: // Things that have a reflection and a shadow
-            for (i = 0; i < kCountOfSnowmen; ++i) {
-                drawSnowman(bp, bp->snowmanIndividual + i);
-            }
+    for (int i = 0; i < kCountOfTrees; ++i) {
+        drawTree(bp, bp->treeIndividual + i);
     }
 }
+
+
+static void drawSnowmen(snow_configuration *bp)
+{
+    for (int i = 0; i < kCountOfSnowmen; ++i) {
+        drawSnowman(bp, bp->snowmanIndividual + i);
+    }
+}
+
 
 ENTRYPOINT void
 draw_snow (ModeInfo *mi)
@@ -1991,32 +2008,48 @@ draw_snow (ModeInfo *mi)
     bp->cullingFaceFront = GL_BACK;
     bp->cullingFaceBack = GL_FRONT;
     glScalef(1, -1, 1); // Inverse for reflection
-    drawObjectsForStage(bp, drawingStageIDReflection);
+
+    drawShore(bp);
+    drawTrees(bp);
+    drawSnowmen(bp);
+
     glScalef(1, -1, 1); // Reorient upward
     bp->cullingFaceFront = GL_FRONT;
     bp->cullingFaceBack = GL_BACK;
 
     // Draw the ice again. I know it seems redundant, but this looks better to me when doing reflections.
     drawIce(bp);
-    
+    drawShore(bp);
+
     // Draw shadows
     bp->isDrawingShadows = True;
     glDepthMask(GL_FALSE);
-    glPushMatrix();
-    setShadowMatrix();
+    glDepthFunc(GL_ALWAYS);
 
     glEnable(GL_STENCIL_TEST);
     glStencilFunc( GL_EQUAL, 1, 1 );
     glStencilOp( GL_KEEP, GL_KEEP, GL_ZERO );
 
-    drawObjectsForStage(bp, drawingStageIDShadow);
+    glPushMatrix();
+    setShadowMatrix(False);
+    drawSnowmen(bp);
+    glPopMatrix();
+
+    glPushMatrix();
+    setShadowMatrix(True);
+    drawTrees(bp);
+    glPopMatrix();
+
     glDisable(GL_STENCIL_TEST);
     glDepthMask(GL_TRUE);
-    glPopMatrix();
+    glDepthFunc(GL_LESS);
 
     // Draw everything that is real
     bp->isDrawingShadows = False;
-    drawObjectsForStage(bp, drawingStageIDReal);
+
+    drawHills(bp);
+    drawTrees(bp);
+    drawSnowmen(bp);
 
     glXSwapBuffers(dpy, window);
 }
