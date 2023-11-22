@@ -109,9 +109,9 @@ const unsigned kCountOfTreeTrunkSlices = 8;
 #define kColorSnow 1, 0.98, 0.98, 1
 #define kColorCarrot 1, 0.35, 0, 1
 #define kColorSkate 0.5, 0.5, 0.5, 1.0
-#define kColorSnowmanArm 0.43, 0.22, 0.08, 1
-#define kColorIce 0.6, 0.8, 0.9, 0.8
-#define kColorTreeTrunk 0.2, 0.2, 0, 1
+#define kColorSnowmanArm 0.55, 0.37, 0.17, 1
+#define kColorIce 0.6, 0.8, 0.9, 0.92
+#define kColorTreeTrunk 0.55, 0.27, 0.07, 1
 #define kColorInkOutline 0, 0, 0, 1
 #define kColorShadow  0, 0, 0, 0.1
 
@@ -1043,54 +1043,117 @@ static void createHatBufferObjects(snow_configuration *bp)
  *
  *************************************************/
 
+
+// Create a circle of eight vertices for a part of the arm.
+// Output will be written to memory pointed to by dest.
+// A total of [ 24 * sizeof(GLfloat) ] bytes will be written.
+static Vert3d * createArmJoint(Vert3d *dest,
+                               Vert3d origin,
+                               Vert3d range)
+{
+    const GLfloat sqrt2 = 1 / sqrtf(2);
+    Vert3d range45 = {
+        range.x * sqrt2,
+        range.y * sqrt2,
+        range.z * sqrt2
+    };
+    
+    *dest = (Vert3d) {
+        origin.x - range.x,
+        origin.y + range.y,
+        origin.z
+    };
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x - range45.x,
+        origin.y + range45.y,
+        origin.z + range45.z
+    },
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x,
+        origin.y,
+        origin.z + range.z
+    },
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x + range45.x,
+        origin.y - range45.y,
+        origin.z + range45.z
+    },
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x + range.x,
+        origin.y - range.y,
+        origin.z
+    },
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x + range45.x,
+        origin.y - range45.y,
+        origin.z - range45.z
+    },
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x,
+        origin.y,
+        origin.z - range.z
+    },
+    ++dest;
+    *dest = (Vert3d) {
+        origin.x - range45.x,
+        origin.y + range45.y,
+        origin.z - range45.z
+    };
+    ++dest;
+    return dest;
+}
+
 static void createArmBufferObjects(snow_configuration *bp)
 {
-    static const Vert3d verts[] = {
-        {
-            0, 0, 0.1
-        }, {
-            0, 0.1, 0
-        }, {
-            0, 0, 0
-        },
-        
-        // elbow
-        {
-            1.6, 0.2, 0.1
-        }, {
-            1.6, 0.3, 0
-        }, {
-            1.6, 0.2, 0
-        },
-        
-        // wrist
-        {
-            2, 0.5, 0.1
-        }, {
-            2, 0.6, 0
-        }, {
-            2, 0.5, 0
-        },
-        
-        // fingers
-        {
-            2.1, 1, 0.2
-        }, {
-            2.3, 0.8, 0
-        }, {
-            2.5, 0.4, 0.2
-        }
-    };
-    int countOfVertices = 12;
+    const int countOfVertices = 8 * 6;
+
+    static Vert3d verts[countOfVertices];
     
-    static const GLuint indices[] = {
-        0,3,2,5,1,4,0,3, // Triangle Strip
-        3,6,5,8,4,7,3,6,
-        9,8,6,7,8,       // Triangle Fan
-        10,8,6,7,8,
-        11,8,6,7,8
+    // Proximal joint [0-7]
+    Vert3d pos = (Vert3d) {0.793, 0, 0};
+    Vert3d range = (Vert3d) {0, 0.06, 0.06};
+    Vert3d *vertPtr = createArmJoint(verts, pos, range);
+    
+    // Medial1 joint [8-15]
+    pos = (Vert3d) {1.6, 0.2, 0};
+    range = (Vert3d) {0, 0.05, 0.05};
+    Vert3d *vertPtr2 = createArmJoint(vertPtr, pos, range);
+    
+    // Medial2 joint [16-23]
+    pos = (Vert3d) {1.9, 0.1, 0};
+    range = (Vert3d) {0, 0.04, 0.04};
+    vertPtr = createArmJoint(vertPtr2, pos, range);
+    
+    // Distal1 terminus [24-31]
+    pos = (Vert3d) {2.3, 0.2, 0};
+    range = (Vert3d) {0.01, 0.03, 0.03};
+    vertPtr2 = createArmJoint(vertPtr, pos, range);
+    
+    // Distal2 terminus [32-39]
+    pos = (Vert3d) {2, 0.5, 0.3};
+    range = (Vert3d) {0.01, 0.03, 0.03};
+    vertPtr = createArmJoint(vertPtr2, pos, range);
+
+    // Distal3 terminus [40-47]
+    pos = (Vert3d) {2.3, 0, 0.1};
+    range = (Vert3d) {-0.01, 0.03, 0.03};
+    vertPtr2 = createArmJoint(vertPtr, pos, range);
+
+    const GLuint countOfIndices = 18 * 5 + 4;
+
+    static const GLuint indices[countOfIndices] = {
+        24,16, 25,17, 26,18, 27,19, 28,20, 29,21, 30,22, 31,23, 24,16,
+        16,8, 17,9, 18,10, 19,11, 20,12, 21,13, 22,14, 23,15, 16,8,
+        8,0, 9,1, 10,2, 11,3, 12,4, 13,5, 14,6, 15,7, 8,0, 0,
+        32, 32,8, 33,9, 34,10, 35,11, 36,12, 37,13, 38,14, 39,15, 32,8, 8,
+        40, 40,16, 41,17, 42,18, 43,19, 44,20, 45,21, 46,22, 47,23, 40,16
     };
-    GLuint countOfIndices = 8+8 + 5+5+5;
     glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + armCoordID) );
     glBufferData(GL_ARRAY_BUFFER,
                  countOfVertices * sizeof(Vert3d),
@@ -1601,12 +1664,14 @@ static void drawArms(snow_configuration *bp)
     }
 
     for ( int i = 0; i < 2; ++i ) {
-        glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_INT, (void*) 0);
-        glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_INT, (void*) (8 * sizeof(GLuint)));
-        glDrawElements(GL_TRIANGLE_FAN, 5, GL_UNSIGNED_INT, (void*) (16 * sizeof(GLuint)));
-        glDrawElements(GL_TRIANGLE_FAN, 5, GL_UNSIGNED_INT, (void*) (21 * sizeof(GLuint)));
-        glDrawElements(GL_TRIANGLE_FAN, 5, GL_UNSIGNED_INT, (void*) (26 * sizeof(GLuint)));
-        
+        glDrawElements(GL_TRIANGLE_STRIP, 18 * 5 + 4, GL_UNSIGNED_INT, (void*) 0);
+//        glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_INT, (void*) (8 * sizeof(GLuint)));
+
+        glDrawArrays(GL_TRIANGLE_FAN, 24, 8);
+        glDrawArrays(GL_TRIANGLE_FAN, 32, 8);
+        glDrawArrays(GL_TRIANGLE_FAN, 40, 8);
+
+        glCullFace(bp->cullingFaceFront);
         glScalef( -1, 1, 1 );
     }
 }
@@ -1657,6 +1722,7 @@ static void drawSnowball(snow_configuration *bp,
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
+    glEnable(GL_CULL_FACE);
     glCullFace(bp->cullingFaceBack);
     glPushMatrix();
     glScalef(radius, radius, radius);
