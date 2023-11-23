@@ -204,6 +204,7 @@ typedef enum {
     
     // Arm
     armCoordID,
+    armCoordOutlineID,
     armIndicesID,
     
     countOfVboIDs
@@ -1112,9 +1113,11 @@ static Vert3d * createArmJoint(Vert3d *dest,
 static void createArmBufferObjects(snow_configuration *bp)
 {
     const int countOfVertices = 8 * 6;
+    const GLfloat outlineWidth = 0.03;
 
     static Vert3d verts[countOfVertices];
-    
+    static Vert3d outlineVerts[countOfVertices];
+
     // Proximal joint [0-7]
     Vert3d pos = (Vert3d) {0.793, 0, 0};
     Vert3d range = (Vert3d) {0, 0.06, 0.06};
@@ -1123,41 +1126,80 @@ static void createArmBufferObjects(snow_configuration *bp)
     // Medial1 joint [8-15]
     pos = (Vert3d) {1.6, 0.2, 0};
     range = (Vert3d) {0, 0.05, 0.05};
-    Vert3d *vertPtr2 = createArmJoint(vertPtr, pos, range);
+    vertPtr = createArmJoint(vertPtr, pos, range);
     
     // Medial2 joint [16-23]
     pos = (Vert3d) {1.9, 0.1, 0};
     range = (Vert3d) {0, 0.04, 0.04};
-    vertPtr = createArmJoint(vertPtr2, pos, range);
+    vertPtr = createArmJoint(vertPtr, pos, range);
     
     // Distal1 terminus [24-31]
     pos = (Vert3d) {2.3, 0.2, 0};
-    range = (Vert3d) {0.01, 0.03, 0.03};
-    vertPtr2 = createArmJoint(vertPtr, pos, range);
+    range = (Vert3d) {0.01, 0.02, 0.02};
+    vertPtr = createArmJoint(vertPtr, pos, range);
     
     // Distal2 terminus [32-39]
     pos = (Vert3d) {2, 0.5, 0.3};
-    range = (Vert3d) {0.01, 0.03, 0.03};
-    vertPtr = createArmJoint(vertPtr2, pos, range);
+    range = (Vert3d) {0.01, 0.02, 0.02};
+    vertPtr = createArmJoint(vertPtr, pos, range);
 
     // Distal3 terminus [40-47]
     pos = (Vert3d) {2.3, 0, 0.1};
-    range = (Vert3d) {-0.01, 0.03, 0.03};
-    vertPtr2 = createArmJoint(vertPtr, pos, range);
+    range = (Vert3d) {-0.01, 0.02, 0.02};
+    vertPtr = createArmJoint(vertPtr, pos, range);
+    
+    // Now we need to repeat the whole thing for the outline.
 
-    const GLuint countOfIndices = 18 * 5 + 4;
+    // Proximal joint [0-7]
+    pos = (Vert3d) {0.793, 0, 0};
+    range = (Vert3d) {0, 0.06 + outlineWidth, 0.06 + outlineWidth};
+    vertPtr = createArmJoint(outlineVerts, pos, range);
+    
+    // Medial1 joint [8-15]
+    pos = (Vert3d) {1.6, 0.2, 0};
+    range = (Vert3d) {0, 0.05 + outlineWidth, 0.05 + outlineWidth};
+    vertPtr = createArmJoint(vertPtr, pos, range);
+    
+    // Medial2 joint [16-23]
+    pos = (Vert3d) {1.9, 0.1, 0};
+    range = (Vert3d) {0, 0.04 + outlineWidth, 0.04 + outlineWidth};
+    vertPtr = createArmJoint(vertPtr, pos, range);
+    
+    // Distal1 terminus [24-31]
+    pos = (Vert3d) {2.3 + outlineWidth, 0.2, 0};
+    range = (Vert3d) {0.01, 0.02 + outlineWidth, 0.02 + outlineWidth};
+    vertPtr = createArmJoint(vertPtr, pos, range);
+    
+    // Distal2 terminus [32-39]
+    pos = (Vert3d) {2 + outlineWidth, 0.5, 0.3};
+    range = (Vert3d) {0.03, 0.02 + outlineWidth, 0.02 + outlineWidth};
+    vertPtr = createArmJoint(vertPtr, pos, range);
+
+    // Distal3 terminus [40-47]
+    pos = (Vert3d) {2.3 + outlineWidth, 0, 0.1};
+    range = (Vert3d) {-0.01, 0.02 + outlineWidth, 0.02 + outlineWidth};
+    vertPtr = createArmJoint(vertPtr, pos, range);
+    
+    const GLuint countOfIndices = 18 * 5 + 4 + 8;
 
     static const GLuint indices[countOfIndices] = {
-        24,16, 25,17, 26,18, 27,19, 28,20, 29,21, 30,22, 31,23, 24,16,
-        16,8, 17,9, 18,10, 19,11, 20,12, 21,13, 22,14, 23,15, 16,8,
-        8,0, 9,1, 10,2, 11,3, 12,4, 13,5, 14,6, 15,7, 8,0, 0,
-        32, 32,8, 33,9, 34,10, 35,11, 36,12, 37,13, 38,14, 39,15, 32,8, 8,
-        40, 40,16, 41,17, 42,18, 43,19, 44,20, 45,21, 46,22, 47,23, 40,16
+        24,16, 25,17, 26,18, 27,19, 28,20, 29,21, 30,22, 31,23, 24,16,     // Segment 3
+        16,8, 17,9, 18,10, 19,11, 20,12, 21,13, 22,14, 23,15, 16,8,        // Segment 2
+        8,0, 9,1, 10,2, 11,3, 12,4, 13,5, 14,6, 15,7, 8,0, 0,              // Segment 1
+        32, 32,8, 33,9, 34,10, 35,11, 36,12, 37,13, 38,14, 39,15, 32,8, 8, // Segment 4
+        40, 40,16, 41,17, 42,18, 43,19, 44,20, 45,21, 46,22, 47,23, 40,16, // Segment 5
+        7, 6, 5, 4, 3, 2, 1, 0                                             // Outline at Proximal joint
     };
     glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + armCoordID) );
     glBufferData(GL_ARRAY_BUFFER,
                  countOfVertices * sizeof(Vert3d),
                  verts,
+                 GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + armCoordOutlineID) );
+    glBufferData(GL_ARRAY_BUFFER,
+                 countOfVertices * sizeof(Vert3d),
+                 outlineVerts,
                  GL_STATIC_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, * ( (bp->bufferID) + armIndicesID) );
@@ -1665,7 +1707,6 @@ static void drawArms(snow_configuration *bp)
 
     for ( int i = 0; i < 2; ++i ) {
         glDrawElements(GL_TRIANGLE_STRIP, 18 * 5 + 4, GL_UNSIGNED_INT, (void*) 0);
-//        glDrawElements(GL_TRIANGLE_STRIP, 8, GL_UNSIGNED_INT, (void*) (8 * sizeof(GLuint)));
 
         glDrawArrays(GL_TRIANGLE_FAN, 24, 8);
         glDrawArrays(GL_TRIANGLE_FAN, 32, 8);
@@ -1673,6 +1714,24 @@ static void drawArms(snow_configuration *bp)
 
         glCullFace(bp->cullingFaceFront);
         glScalef( -1, 1, 1 );
+    }
+    
+    if ( ! bp->isDrawingShadows) {
+        glColor4f(kColorInkOutline);
+        glBindBuffer( GL_ARRAY_BUFFER,  bp->bufferID[armCoordOutlineID] );
+        glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
+
+        for ( int i = 0; i < 2; ++i ) {
+            glDrawElements(GL_TRIANGLE_STRIP, 18 * 5 + 4, GL_UNSIGNED_INT, (void*) 0);
+
+            glDrawElements(GL_TRIANGLE_FAN, 8, GL_UNSIGNED_INT, (void*) ((18 * 5 + 4) * sizeof(GLuint)));
+            glDrawArrays(GL_TRIANGLE_FAN, 24, 8);
+            glDrawArrays(GL_TRIANGLE_FAN, 32, 8);
+            glDrawArrays(GL_TRIANGLE_FAN, 40, 8);
+
+            glCullFace(bp->cullingFaceBack);
+            glScalef( -1, 1, 1 );
+        }
     }
 }
 
