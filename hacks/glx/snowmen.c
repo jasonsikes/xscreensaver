@@ -10,7 +10,7 @@
  */
 
 
-#define DEFAULTS ""
+#define DEFAULTS    "*delay:    30000       \n"
 
 # define release_snow 0
 
@@ -57,8 +57,8 @@ const GLdouble kYon    = 640;
 /* 'D' means 'Delta'. On every frame,
  * move the camera and snowmen by this amount.
  */
-const GLdouble kDCameraRho = 0.0001;
-const GLfloat kDSnowmanRho = 0.001;
+const GLdouble kDCameraRho = 0.001;
+const GLfloat kDSnowmanRho = 0.007;
 
 const GLfloat kCarrotScaleDivide = 1.9;
 #define kCarrotOutlineInverseScale 0.6, 0.6, 0.7
@@ -2116,7 +2116,7 @@ draw_snow (ModeInfo *mi)
     
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
-    gluLookAt(kCameraRadius * sin(bp->cameraRho), kCameraHeight, kCameraRadius * cos(bp->cameraRho),
+    gluLookAt(kCameraRadius * sin(0 - bp->cameraRho), kCameraHeight, kCameraRadius * cos(bp->cameraRho),
               0, 0, 0,
               0, 1, 0);
     
