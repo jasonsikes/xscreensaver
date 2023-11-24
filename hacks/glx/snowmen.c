@@ -763,11 +763,11 @@ static void createHillsBufferObjects(snow_configuration *bp)
 static void createShoreBufferObjects(snow_configuration *bp)
 {
     int countOfSlopedCircleSteps = 7;
-    GLfloat radiusOfSlopedCircle = 2;   // distance of smaller steps from the pond edge
+    GLfloat radiusOfSlopedCircle = 1.5;   // distance of smaller steps from the pond edge
     GLfloat radiusOfFlatCircle = kUniverseEdgeRadius;
     GLfloat textureRepeatCount = 3;     // number of times texture repeats as it goes around the pond
-    GLfloat portionOfTexture = 0.25;    // only use this amount of the texture on the sloped part
-    GLfloat curveValue = 1.0 / 3;       // sharpness of the shore's curvature
+    GLfloat portionOfTexture = 0.21;    // only use this amount of the texture on the sloped part
+    GLfloat curveValue = 1.0 / 2;       // sharpness of the shore's curvature
     GLfloat heightOfShore = kShoreHeight;
     unsigned countOfShoreVertices = bp->pondInfo.countOfVertices - 2; // skip the first and last
     unsigned countOfVertices = countOfShoreVertices * 2 * (countOfSlopedCircleSteps + 1);
