@@ -23,9 +23,9 @@ import subprocess
 def unNormalize(n):
     return ((n+1) * IMAGE_SIZE/2)
 
-paramList = ["convert", IMAGE_FILENAME_SRC,
-             "-stroke", LINE_COLOR,
-             "-strokewidth", LINE_WIDTH]
+paramList = ["convert", IMAGE_FILENAME_SRC]
+
+drawList= []
 
 for i in range(COUNT_OF_LINES):
     startA = math.tau * i / COUNT_OF_LINES
@@ -37,9 +37,13 @@ for i in range(COUNT_OF_LINES):
     endX = unNormalize(math.sin(endA))
     endY = unNormalize(math.cos(endA))
 
-    paramList.append("-draw")
-    paramList.append("line %s,%s %s,%s" % (startX,startY , endX,endY))
+    drawList.append("-draw")
+    drawList.append("line %s,%s %s,%s" % (startX,startY , endX,endY))
 
+paramList.extend(["-stroke", LINE_COLOR,
+                  "-strokewidth", LINE_WIDTH])
+
+paramList.extend(drawList)
 
 paramList.append(IMAGE_FILENAME_DEST)
 
