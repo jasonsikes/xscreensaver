@@ -16,10 +16,6 @@
 
 #include "xlockmore.h"
 #include <ctype.h>
-
-/* because I sometimes use printf() for debugging. */
-#include <stdio.h>
-
 #include "ximage-loader.h"
 #include "snowmen_textures.h"
 
@@ -82,22 +78,21 @@ const GLfloat kUniverseEdgeRadius = 150;
 const GLfloat kShoreHeight = 1;
 const GLfloat kHillsHeight = 20;
 
-
-const unsigned int kCountOfSnowmen = 9;
+#define kCountOfSnowmen 9
 
 /* IMPORTANT! See comment under 'setupTrees()' for how to set this value. */
-const unsigned int kCountOfTrees = 27;
+#define kCountOfTrees 27
 
-const unsigned int kCountOfHatSlices = 16;
-const unsigned int kCountOfTreeSkirts = 5;
+#define kCountOfHatSlices 16
+#define kCountOfTreeSkirts 5
 
-const unsigned int kCountOfPondExteriorVertices = 160;
-const unsigned int kCountOfPondWeights = 11;
+#define kCountOfPondExteriorVertices 160
+#define kCountOfPondWeights 11
 
 // Caution: texture has outline that is expecting exactly this number
-const unsigned kCountOfTreeSkirtVertices = 16;
+#define kCountOfTreeSkirtVertices 16
 
-const unsigned kCountOfTreeTrunkSlices = 8;
+#define kCountOfTreeTrunkSlices 8
 
 // some colors
 const Vert4d kColorSky = {0.53, 0.81, 0.92, 1};
@@ -305,7 +300,6 @@ static void drawArms(snow_configuration *bp);
 static void drawSkate(snow_configuration *bp, Bool isOnLeft);
 static void drawCarrot(snow_configuration *bp, GLfloat radius);
 static void drawSnowman(snow_configuration *bp, SnowmanState_t *state);
-static void drawObjectsForStage(snow_configuration *bp, DrawingStageID_t stage);
 static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius);
 static void drawIce(snow_configuration *bp);
 static void drawShore(snow_configuration *bp);
@@ -1093,13 +1087,21 @@ static Vert3d * createArmJoint(Vert3d *dest,
     return dest;
 }
 
+// 8 vertices in each of 6 joints
+#define kCountOfVerticesArmBuffer 48
+
+// There are 5 arm segments.
+// Each arm segment has 18 indices [ ( 8*2 ) + 2 ].
+// Plus 4 indices for triangle strip jumping.
+// Plus 8 indices to define shoulder joint outline.
+// 
+#define kCountOfIndicesArmBuffer (5 * 18 + 4 + 8)
 static void createArmBufferObjects(snow_configuration *bp)
 {
-    const int countOfVertices = 8 * 6;
     const GLfloat outlineWidth = 0.03;
 
-    static Vert3d verts[countOfVertices];
-    static Vert3d outlineVerts[countOfVertices];
+    static Vert3d verts[kCountOfVerticesArmBuffer];
+    static Vert3d outlineVerts[kCountOfVerticesArmBuffer];
 
     // Proximal joint [0-7]
     Vert3d pos = (Vert3d) {0.76, 0, 0};
@@ -1163,9 +1165,7 @@ static void createArmBufferObjects(snow_configuration *bp)
     range = (Vert3d) {-0.01, 0.02 + outlineWidth, 0.02 + outlineWidth};
     vertPtr = createArmJoint(vertPtr, pos, range);
     
-    const GLuint countOfIndices = 18 * 5 + 4 + 8;
-
-    static const GLuint indices[countOfIndices] = {
+    static const GLuint indices[kCountOfIndicesArmBuffer] = {
         24,16, 25,17, 26,18, 27,19, 28,20, 29,21, 30,22, 31,23, 24,16,     // Segment 3
         16,8, 17,9, 18,10, 19,11, 20,12, 21,13, 22,14, 23,15, 16,8,        // Segment 2
         8,0, 9,1, 10,2, 11,3, 12,4, 13,5, 14,6, 15,7, 8,0, 0,              // Segment 1
@@ -1175,19 +1175,19 @@ static void createArmBufferObjects(snow_configuration *bp)
     };
     glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + armCoordID) );
     glBufferData(GL_ARRAY_BUFFER,
-                 countOfVertices * sizeof(Vert3d),
+                 kCountOfVerticesArmBuffer * sizeof(Vert3d),
                  verts,
                  GL_STATIC_DRAW);
     
     glBindBuffer(GL_ARRAY_BUFFER, * ( (bp->bufferID) + armCoordOutlineID) );
     glBufferData(GL_ARRAY_BUFFER,
-                 countOfVertices * sizeof(Vert3d),
+                 kCountOfVerticesArmBuffer * sizeof(Vert3d),
                  outlineVerts,
                  GL_STATIC_DRAW);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, * ( (bp->bufferID) + armIndicesID) );
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                 countOfIndices * sizeof(GLuint),
+                 kCountOfIndicesArmBuffer * sizeof(GLuint),
                  indices,
                  GL_STATIC_DRAW);
 }
