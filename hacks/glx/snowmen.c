@@ -42,17 +42,15 @@ typedef struct {
 
 /* Because M_PI might not be defined. */
 const GLfloat kPi = 3.141592653589;
-const GLfloat kTau = 2.0 * kPi;
+const GLfloat kTau = 2 * kPi;
 
-const GLdouble kCameraPerspectiveAngle = 45;
-//const GLfloat kCameraRadius = 68;
-//const GLfloat kCameraHeight = 400;
-const GLdouble kCameraRadius = 28;
+const GLdouble kCameraPerspectiveAngle = 36;
+const GLdouble kCameraRadius = 33;
 const GLdouble kCameraHeight = 7;
 
 /* Near and far view planes. */
 const GLdouble kHither = 10;
-const GLdouble kYon    = 640;
+const GLdouble kYon    = 200;
 
 /* 'D' means 'Delta'. On every frame,
  * move the camera and snowmen by this amount.
@@ -61,7 +59,7 @@ const GLdouble kDCameraRho = 0.001;
 const GLfloat kDSnowmanRho = 0.007;
 
 const GLfloat kCarrotScaleDivide = 1.9;
-#define kCarrotOutlineInverseScale 0.6, 0.6, 0.7
+const Vert3d kCarrotOutlineInverseScale = {0.6, 0.6, 0.7};
 
 const GLfloat kSkateLateralDistance = 0.7;
 const GLfloat kSkateHeight          = 0.01;
@@ -84,20 +82,17 @@ const GLfloat kUniverseEdgeRadius = 150;
 const GLfloat kShoreHeight = 1;
 const GLfloat kHillsHeight = 20;
 
-#define kHatTranslateOutline 0, 0.04, 0
-#define kHatScaleOutline 1.15, 1.6, 1.15
-#define kHatScaleStem 1.08, 1.05/1.8, 1.08
 
-#define kCountOfSnowmen 9
+const unsigned int kCountOfSnowmen = 9;
 
 /* IMPORTANT! See comment under 'setupTrees()' for how to set this value. */
-#define kCountOfTrees 27
+const unsigned int kCountOfTrees = 27;
 
-#define kCountOfHatSlices 16
-#define kCountOfTreeSkirts 5
+const unsigned int kCountOfHatSlices = 16;
+const unsigned int kCountOfTreeSkirts = 5;
 
-#define kCountOfPondExteriorVertices 160
-#define kCountOfPondWeights 11
+const unsigned int kCountOfPondExteriorVertices = 160;
+const unsigned int kCountOfPondWeights = 11;
 
 // Caution: texture has outline that is expecting exactly this number
 const unsigned kCountOfTreeSkirtVertices = 16;
@@ -105,15 +100,15 @@ const unsigned kCountOfTreeSkirtVertices = 16;
 const unsigned kCountOfTreeTrunkSlices = 8;
 
 // some colors
-#define kColorSky 0.53, 0.81, 0.92, 1
-#define kColorSnow 1, 0.98, 0.98, 1
-#define kColorCarrot 1, 0.35, 0, 1
-#define kColorSkate 0.5, 0.5, 0.5, 1.0
-#define kColorSnowmanArm 0.55, 0.37, 0.17, 1
-#define kColorIce 0.6, 0.8, 0.9, 0.92
-#define kColorTreeTrunk 0.55, 0.27, 0.07, 1
-#define kColorInkOutline 0, 0, 0, 1
-#define kColorShadow  0, 0, 0, 0.1
+const Vert4d kColorSky = {0.53, 0.81, 0.92, 1};
+const GLfloat kColorSnow[] = {1, 0.98, 0.98, 1};
+const GLfloat kColorCarrot[] = {1, 0.35, 0, 1};
+const GLfloat kColorSkate[] = {0.5, 0.5, 0.5, 1.0};
+const GLfloat kColorSnowmanArm[] = {0.55, 0.37, 0.17, 1};
+const GLfloat kColorIce[] = {0.6, 0.8, 0.9, 0.92};
+const GLfloat kColorTreeTrunk[] = {0.55, 0.27, 0.07, 1};
+const GLfloat kColorInkOutline[] = {0, 0, 0, 1};
+const GLfloat kColorShadow[] = {0, 0, 0, 0.1};
 
 Vert4d snowmanHatColors[kCountOfSnowmen] = {
     {
@@ -137,9 +132,6 @@ Vert4d snowmanHatColors[kCountOfSnowmen] = {
     }
 };
 
-
-// One day I'll learn what this means, because I'd like to slow this down a bit.
-#define DEF_SPEED       "0.05"
 
 // For the snowball, pond, shore, etc.
 typedef struct {
@@ -275,7 +267,7 @@ typedef struct {
     GLenum cullingFaceFront;
     GLenum cullingFaceBack;
     
-    // Some things are drawn casting a shadow.
+    // Set this to True when we are drawing shadows.
     Bool isDrawingShadows;
 
     SnowmanState_t snowmanIndividual[kCountOfSnowmen];
@@ -327,15 +319,6 @@ static void setShadowMatrix(Bool isDrawingShore);
 
 static snow_configuration *bps = NULL;
 
-static GLfloat speed;
-
-static XrmOptionDescRec opts[] = {
-    { "-speed",  ".speed",  XrmoptionSepArg, 0 },
-};
-
-static argtype vars[] = {
-    {&speed,     "speed",  "Speed",  DEF_SPEED,  t_Float},
-};
 
 /*************************************************
  *
@@ -1119,7 +1102,7 @@ static void createArmBufferObjects(snow_configuration *bp)
     static Vert3d outlineVerts[countOfVertices];
 
     // Proximal joint [0-7]
-    Vert3d pos = (Vert3d) {0.793, 0, 0};
+    Vert3d pos = (Vert3d) {0.76, 0, 0};
     Vert3d range = (Vert3d) {0, 0.06, 0.06};
     Vert3d *vertPtr = createArmJoint(verts, pos, range);
     
@@ -1561,7 +1544,7 @@ static void createAllTextures(ModeInfo *mi)
 
 /* Window management, etc
  */
-ENTRYPOINT ModeSpecOpt snow_opts = {countof(opts), opts, countof(vars), vars, NULL};
+ENTRYPOINT ModeSpecOpt snow_opts = {0, NULL, 0, NULL, NULL};
 
 ENTRYPOINT void
 reshape_snow (ModeInfo *mi, int width, int height)
@@ -1669,9 +1652,9 @@ static void drawSkate(snow_configuration *bp, Bool isOnLeft)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[skateIndicesID]);
 
     if (bp->isDrawingShadows) {
-        glColor4f(kColorShadow);
+        glColor4fv(kColorShadow);
     } else {
-        glColor4f(kColorSkate);
+        glColor4fv(kColorSkate);
     }
     if ( isOnLeft ) {
         glTranslatef( kSkateLateralDistance, kSkateHeight, kSkateVentralDistance );
@@ -1700,9 +1683,9 @@ static void drawArms(snow_configuration *bp)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[armIndicesID]);
 
     if (bp->isDrawingShadows) {
-        glColor4f(kColorShadow);
+        glColor4fv(kColorShadow);
     } else {
-        glColor4f(kColorSnowmanArm);
+        glColor4fv(kColorSnowmanArm);
     }
 
     for ( int i = 0; i < 2; ++i ) {
@@ -1717,7 +1700,7 @@ static void drawArms(snow_configuration *bp)
     }
     
     if ( ! bp->isDrawingShadows) {
-        glColor4f(kColorInkOutline);
+        glColor4fv(kColorInkOutline);
         glBindBuffer( GL_ARRAY_BUFFER,  bp->bufferID[armCoordOutlineID] );
         glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
 
@@ -1753,17 +1736,17 @@ static void drawCarrot(snow_configuration *bp, GLfloat radius)
     glTranslatef( 0, 0, radius * kCarrotScaleDivide );
 
     if (bp->isDrawingShadows) {
-        glColor4f(kColorShadow);
+        glColor4fv(kColorShadow);
     } else {
-        glColor4f(kColorInkOutline);
+        glColor4fv(kColorInkOutline);
     }
     glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_INT, (void*) 0);
     glDrawElements(GL_TRIANGLE_FAN, 10, GL_UNSIGNED_INT, (void*) (18 * sizeof(GLuint)));
     glDrawElements(GL_TRIANGLE_FAN, 8, GL_UNSIGNED_INT, (void*)  (28 * sizeof(GLuint)));
 
     if ( ! bp->isDrawingShadows) {
-        glColor4f( kColorCarrot );
-        glScalef( kCarrotOutlineInverseScale );
+        glColor4fv( kColorCarrot );
+        glScalef( kCarrotOutlineInverseScale.x, kCarrotOutlineInverseScale.y, kCarrotOutlineInverseScale.z );
         glCullFace(bp->cullingFaceBack);
         
         glDrawElements(GL_TRIANGLE_STRIP, 18, GL_UNSIGNED_INT, (void*) 0);
@@ -1789,16 +1772,16 @@ static void drawSnowball(snow_configuration *bp,
     glBindBuffer(GL_ARRAY_BUFFER, bp->bufferID[snowballCoordID]);
     glVertexPointer(3, GL_FLOAT, 0, (GLvoid*) 0);
 
-    glColor4f(kColorShadow);
+    glColor4fv(kColorShadow);
     if ( ! bp->isDrawingShadows) {
         glEnable( GL_TEXTURE_2D );
         glBindTexture( GL_TEXTURE_2D, texture );
         glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[snowballTexID] );
         glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
 
-        glColor4f( kColorSnow );
+        glColor4fv( kColorSnow );
         glDrawArrays(GL_TRIANGLES, 0, bp->snowballAry.countOfVertices);
-        glColor4f(kColorInkOutline);
+        glColor4fv(kColorInkOutline);
     }
     
     glDisable( GL_TEXTURE_2D );
@@ -1826,7 +1809,7 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bp->bufferID[hatIndicesID]);
 
     if (bp->isDrawingShadows) {
-        glColor4f(kColorShadow);
+        glColor4fv(kColorShadow);
     } else {
         glColor4f( hatColor->x, hatColor->y, hatColor->z, hatColor->w );
     }
@@ -1856,7 +1839,7 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
                    hatInfo->stemTriangleStripIndices);
     
     if ( ! bp->isDrawingShadows) {
-        glColor4f(kColorInkOutline);
+        glColor4fv(kColorInkOutline);
         
         glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[hatOutlineCoordID] );
         glVertexPointer( 3, GL_FLOAT, 0, (GLvoid*) 0 );
@@ -1888,7 +1871,7 @@ static void drawHat(snow_configuration *bp, Vert4d *hatColor, GLfloat radius)
 
 static void drawIce(snow_configuration *bp)
 {
-    glColor4f( kColorIce );
+    glColor4fv( kColorIce );
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
@@ -1906,7 +1889,7 @@ static void drawIce(snow_configuration *bp)
 
 static void drawShore(snow_configuration *bp)
 {
-    glColor4f( kColorSnow );
+    glColor4fv( kColorSnow );
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
@@ -1923,7 +1906,7 @@ static void drawShore(snow_configuration *bp)
 
 static void drawHills(snow_configuration *bp)
 {
-    glColor4f( kColorSnow );
+    glColor4fv( kColorSnow );
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisableClientState(GL_INDEX_ARRAY);
@@ -1955,7 +1938,7 @@ static void drawTree(snow_configuration *bp, TreeState_t *state)
         glTexCoordPointer( 2, GL_FLOAT, 0, (GLvoid*) 0 );
         glColor4f(1, 1, 1, 1);
     } else {
-        glColor4f(kColorShadow);
+        glColor4fv(kColorShadow);
     }
 
     glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesCoordID]);
@@ -1983,14 +1966,14 @@ static void drawTree(snow_configuration *bp, TreeState_t *state)
         glDisable( GL_TEXTURE_2D );
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
         
-        glColor4f( kColorTreeTrunk );
+        glColor4fv( kColorTreeTrunk );
         
         glDrawArrays( GL_TRIANGLE_STRIP,
                      kCountOfTreeSkirts * (kCountOfTreeSkirtVertices + 2),
                      (kCountOfTreeTrunkSlices + 1) * 2);
         
         // Tree skirts outline
-        glColor4f(kColorInkOutline);
+        glColor4fv(kColorInkOutline);
         glCullFace(bp->cullingFaceFront);
         
         glBindBuffer( GL_ARRAY_BUFFER, bp->bufferID[treesOutlineCoordID]);
@@ -2106,7 +2089,7 @@ draw_snow (ModeInfo *mi)
     glXMakeCurrent(MI_DISPLAY(mi), MI_WINDOW(mi), *bp->glx_context);
     
     glShadeModel(GL_FLAT);
-    glClearColor( kColorSky );
+    glClearColor( kColorSky.x, kColorSky.y, kColorSky.z, kColorSky.w );
     glClearStencil(1);
     glEnable(GL_CULL_FACE);
     glEnable(GL_BLEND);
