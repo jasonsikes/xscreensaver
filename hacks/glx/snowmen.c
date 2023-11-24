@@ -1374,7 +1374,7 @@ static void initTree(TreeState_t *state,
     state->location = *location;
     state->height = height;
     state->bottomSkirtRadius = bottomSkirtRadius;
-    state->rotation = random() * kTau / RAND_MAX;
+    state->rotation = random() * 360.0 / RAND_MAX;
 }
 
 static void setupTrees(snow_configuration *bp)
