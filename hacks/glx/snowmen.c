@@ -119,15 +119,15 @@ Vert4d snowmanHatColors[kCountOfSnowmen] = {
     {
         .65, .16, .16, 1 // brown
     }, {
-        0, .39, 0, 1     // dark green
+        1, .97, .86, 1     // Cornsilk
     }, {
-        .28, .82, .8, 1  // Medium Turquoise
+        .6, .2, .8, 1  // Dark Orchid
     }, {
-        0, 0, .5 , 1     // Navy Blue
+        .87, .63, .87 , 1     // Plum
     }, {
         .86, .08, .24, 1 // Crimson
     }, {
-        .73, .33, .83, 1 // Medium Orchid
+        .98, .5, .54, 1 // Salmon
     }, {
         .96, .64, .38, 1 // Sandy Brown
     }, {
