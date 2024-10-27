@@ -430,7 +430,9 @@
   GL: 				cubocteversion --root			    \\n\
 				droste --root				    \\n\
   GL: 				papercube --root			    \\n\
-  GL: 				skulloop --root				    \\n",
+  GL: 				skulloop --root				    \\n\
+  GL: 				highvoltage --root			    \\n\
+  GL: 				kallisti --root				    \\n",
 "*hacks.antinspect.name:     Ant Inspect",
 "*hacks.antmaze.name:        Ant Maze",
 "*hacks.antspotlight.name:   Ant Spotlight",
@@ -493,6 +495,7 @@
 "*hacks.gravitywell.name:    Gravity Well",
 "*hacks.hexstrut.name:       Hex Strut",
 "*hacks.hextrail.name:       Hex Trail",
+"*hacks.highvoltage.name:    High Voltage",
 "*hacks.ifs.name:            IFS",
 "*hacks.imsmap.name:         IMS Map",
 "*hacks.jigglypuff.name:     Jiggly Puff",
