@@ -1,4 +1,4 @@
-/* snowmen, Copyright (c) 2023 Jason Sikes <sikes@acm.org>
+/* snowmen, Copyright (c) 2024 Jason Sikes <sikes@acm.org>
  *
  * Permission to use, copy, modify, distribute, and sell this software and its
  * documentation for any purpose is hereby granted without fee, provided that
@@ -17,7 +17,15 @@
 #include "xlockmore.h"
 #include <ctype.h>
 #include "ximage-loader.h"
-#include "snowmen_textures.h"
+
+#include "../images/gen/snowmen_base_png.h"
+#include "../images/gen/snowmen_head_png.h"
+#include "../images/gen/snowmen_hill_png.h"
+#include "../images/gen/snowmen_ice_png.h"
+#include "../images/gen/snowmen_shore_png.h"
+#include "../images/gen/snowmen_torso_png.h"
+#include "../images/gen/snowmen_tree_png.h"
+
 
 #ifdef USE_GL /* whole file */
 
@@ -1508,38 +1516,38 @@ static void createAllTextures(ModeInfo *mi)
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDSnowmanBase),
-                  base_png,
-                  base_png_len);
+                  snowmen_base_png,
+                  sizeof(snowmen_base_png));
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDSnowmanHead),
-                  head_png,
-                  head_png_len);
+                  snowmen_head_png,
+                  sizeof(snowmen_head_png));
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDSnowmanTorso),
-                  torso_png,
-                  torso_png_len);
+                  snowmen_torso_png,
+                  sizeof(snowmen_torso_png));
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDHills),
-                  hillTexture_png,
-                  hillTexture_png_len);
+                  snowmen_hill_png,
+                  sizeof(snowmen_hill_png));
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDIce),
-                  iceTexture_png,
-                  iceTexture_png_len);
+                  snowmen_ice_png,
+                  sizeof(snowmen_ice_png));
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDShore),
-                  shoreTexture_png,
-                  shoreTexture_png_len);
+                  snowmen_shore_png,
+                  sizeof(snowmen_shore_png));
     
     createTexture(mi,
                   * ( (bp->textureID) + kTextureIDTrees),
-                  treeTexture_png,
-                  treeTexture_png_len);
+                  snowmen_tree_png,
+                  sizeof(snowmen_tree_png));
 }
 
 /* Window management, etc
