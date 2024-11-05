@@ -4260,7 +4260,6 @@ snowmen.o: ../../config.h
 snowmen.o: $(HACK_SRC)/fps.h
 snowmen.o: $(HACK_SRC)/recanim.h
 snowmen.o: $(HACK_SRC)/screenhackI.h
-snowmen.o: $(srcdir)/snowmen_textures.h
 snowmen.o: $(UTILS_SRC)/colors.h
 snowmen.o: $(UTILS_SRC)/erase.h
 snowmen.o: $(UTILS_SRC)/font-retry.h
