@@ -21,7 +21,6 @@
 #include "../images/gen/snowmen_base_png.h"
 #include "../images/gen/snowmen_head_png.h"
 #include "../images/gen/snowmen_hill_png.h"
-#include "../images/gen/snowmen_ice_png.h"
 #include "../images/gen/snowmen_shore_png.h"
 #include "../images/gen/snowmen_torso_png.h"
 #include "../images/gen/snowmen_tree_png.h"
@@ -286,10 +285,15 @@ static void divideTriangle(snow_configuration *bp,
                            int iteration, unsigned int *snowballAssemblyIndex);
 static void createBufferObjects(snow_configuration *bp);
 static void createAllTextures(ModeInfo *mi);
-static void createTexture(ModeInfo *mi,
-                          GLuint textureID,
-                          const unsigned char *data,
-                          unsigned int dataLen);
+static void createTextureFromImage(ModeInfo *mi,
+                                   GLuint textureID,
+                                   XImage *image);
+static void createIceTexture(ModeInfo *mi,
+                             GLuint textureID);
+static void createTextureFromFile(ModeInfo *mi,
+                                  GLuint textureID,
+                                  const unsigned char *data,
+                                  unsigned int dataLen);
 static void initTree(TreeState_t *state,
               Vert3d *location,
               GLfloat height,
@@ -1487,10 +1491,20 @@ static void createBufferObjects(snow_configuration *bp)
     createHatBufferObjects(bp);
 }
 
-static void createTexture(ModeInfo *mi,
-                          GLuint textureID,
-                          const unsigned char *data,
-                          unsigned int dataLen)
+static void createTextureFromFile(ModeInfo *mi,
+                                  GLuint textureID,
+                                  const unsigned char *data,
+                                  unsigned int dataLen)
+{
+    XImage *image = image_data_to_ximage (MI_DISPLAY (mi), MI_VISUAL (mi),
+                                          data, dataLen);
+    createTextureFromImage(mi, textureID, image);
+    XDestroyImage (image);
+}
+
+static void createTextureFromImage(ModeInfo *mi,
+                                   GLuint textureID,
+                                   XImage *image)
 {
     glBindTexture (GL_TEXTURE_2D, textureID );
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
@@ -1498,56 +1512,88 @@ static void createTexture(ModeInfo *mi,
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    
-    XImage *image = image_data_to_ximage (MI_DISPLAY (mi), MI_VISUAL (mi),
-                                          data, dataLen);
+
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
                  image->width, image->height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, image->data);
-    XDestroyImage (image);
-    
 }
+
 
 static void createAllTextures(ModeInfo *mi)
 {
     snow_configuration *bp = &bps[MI_SCREEN(mi)];
     glGenTextures(kCountOfTextureIDs, bp->textureID);
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDSnowmanBase),
-                  snowmen_base_png,
-                  sizeof(snowmen_base_png));
+    createTextureFromFile(mi,
+                          * ( (bp->textureID) + kTextureIDSnowmanBase),
+                          snowmen_base_png,
+                          sizeof(snowmen_base_png));
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDSnowmanHead),
-                  snowmen_head_png,
-                  sizeof(snowmen_head_png));
+    createTextureFromFile(mi,
+                          * ( (bp->textureID) + kTextureIDSnowmanHead),
+                          snowmen_head_png,
+                          sizeof(snowmen_head_png));
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDSnowmanTorso),
-                  snowmen_torso_png,
-                  sizeof(snowmen_torso_png));
+    createTextureFromFile(mi,
+                          * ( (bp->textureID) + kTextureIDSnowmanTorso),
+                          snowmen_torso_png,
+                          sizeof(snowmen_torso_png));
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDHills),
-                  snowmen_hill_png,
-                  sizeof(snowmen_hill_png));
+    createTextureFromFile(mi,
+                          * ( (bp->textureID) + kTextureIDHills),
+                          snowmen_hill_png,
+                          sizeof(snowmen_hill_png));
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDIce),
-                  snowmen_ice_png,
-                  sizeof(snowmen_ice_png));
+    createIceTexture(mi, * ( (bp->textureID) + kTextureIDIce));
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDShore),
-                  snowmen_shore_png,
-                  sizeof(snowmen_shore_png));
+    createTextureFromFile(mi,
+                          * ( (bp->textureID) + kTextureIDShore),
+                          snowmen_shore_png,
+                          sizeof(snowmen_shore_png));
     
-    createTexture(mi,
-                  * ( (bp->textureID) + kTextureIDTrees),
-                  snowmen_tree_png,
-                  sizeof(snowmen_tree_png));
+    createTextureFromFile(mi,
+                          * ( (bp->textureID) + kTextureIDTrees),
+                          snowmen_tree_png,
+                          sizeof(snowmen_tree_png));
+}
+
+static unsigned long pixelForIceTexture(int x, int y, int w, int h)
+{
+    unsigned long retval;
+    char *addr = (char *)&retval;
+    if (x & 4)
+    {
+        addr[0] = 0;
+        addr[1] = 0;
+        addr[2] = 255;
+        addr[3] = 255;
+    } else {
+        addr[0] = 255;
+        addr[1] = 0;
+        addr[2] = 0;
+        addr[3] = 255;
+    }
+    return retval;
+}
+
+static void createIceTexture(ModeInfo *mi,
+                             GLuint textureID)
+{
+    const int w = 256;
+    const int h = 256;
+    int x,y;
+
+    XImage *image = XCreateImage (MI_DISPLAY (mi), MI_VISUAL (mi), 32, ZPixmap, 0, 0, w, h, 32, 0);
+    image->data = (char *) malloc(h * image->bytes_per_line);
+    for (x = 0; x < w; ++x) {
+        for (y = 0; y < h; ++y) {
+            XPutPixel(image, x, y, pixelForIceTexture(x, y, w, h));
+        } // /for y
+    } // /for x
+
+    createTextureFromImage(mi, textureID, image);
+    XDestroyImage(image);
 }
 
 /* Window management, etc
