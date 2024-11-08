@@ -1558,22 +1558,101 @@ static void createAllTextures(ModeInfo *mi)
                           sizeof(snowmen_tree_png));
 }
 
+/*************************************************
+ *
+ *     ICE TEXTURE GENERATION
+ *
+ *************************************************/
+
+inline static float lerp (float a, float b, float c)
+{
+    return (b - a) * c + a;
+}
+
+static Vert2d randomGradient(int ix, int iy)
+{
+    // No precomputed gradients mean this works for any number of grid coordinates
+    const unsigned w = 8 * sizeof(unsigned);
+    const unsigned s = w / 2; // rotation width
+    unsigned a = ix, b = iy;
+    a *= 3284157443;
+    b ^= a << s | a >> (w-s);
+    b *= 1911520717;
+    a ^= b << s | b >> (w-s);
+    a *= 2048419325;
+    float random = a * (3.14159265 / ~(~0u >> 1)); // in [0, 2*Pi]
+    return (Vert2d) { .x = cos(random), .y = sin(random) };
+}
+
+static float dotGridGradient(int ix, int iy, float x, float y) {
+    // Get gradient from integer coordinates
+    Vert2d gradient = randomGradient(ix, iy);
+
+    // Compute the distance vector
+    float dx = x - (float)ix;
+    float dy = y - (float)iy;
+
+    // Compute the dot-product
+    return (dx*gradient.x + dy*gradient.y);
+}
+
+// Compute Perlin noise at coordinates x, y
+// Will return in range -1 to 1.
+static float perlin(float x, float y) {
+    // Determine grid cell coordinates
+    int x0 = (int)floor(x);
+    int x1 = x0 + 1;
+    int y0 = (int)floor(y);
+    int y1 = y0 + 1;
+
+    // Determine interpolation weights
+    float sx = x - (float)x0;
+    float sy = y - (float)y0;
+
+    // Interpolate between grid point gradients
+    float n0, n1, ix0, ix1, value;
+
+    n0 = dotGridGradient(x0, y0, x, y);
+    n1 = dotGridGradient(x1, y0, x, y);
+    ix0 = lerp(n0, n1, sx);
+
+    n0 = dotGridGradient(x0, y1, x, y);
+    n1 = dotGridGradient(x1, y1, x, y);
+    ix1 = lerp(n0, n1, sx);
+
+    value = lerp(ix0, ix1, sy);
+    return value;
+}
+
+static unsigned char colorComponentForValue(int component, float value)
+{
+    static float iceValues[] = {
+        0x98, 0xBB, 0xFF,
+        0xC6, 0xEF, 0xFF,
+    };
+
+    if ((value > 1.0f) || (value < -1.0f)) {
+        printf("value out of range in colorComponentForValue()\n");
+        return 0;
+    }
+    return (unsigned char)lerp(iceValues[component], iceValues[3 + component], value*0.5f + 0.5f);
+}
+
 static unsigned long pixelForIceTexture(int x, int y, int w, int h)
 {
     unsigned long retval;
-    char *addr = (char *)&retval;
-    if (x & 4)
-    {
-        addr[0] = 0;
-        addr[1] = 0;
-        addr[2] = 255;
-        addr[3] = 255;
-    } else {
-        addr[0] = 255;
-        addr[1] = 0;
-        addr[2] = 0;
-        addr[3] = 255;
-    }
+    unsigned char *addr = (unsigned char *)&retval;
+    float xmul = 16.0f / w;
+    float ymul = 16.0f / h;
+    float v = perlin(x * xmul, y * ymul)
+            + perlin(x * xmul * 2,y * ymul * 2)/2
+            + perlin(x * xmul * 4,y * ymul * 4)/4;
+            // + perlin(x * xmul * 8,y * ymul * 8)/8;
+
+    addr[0] = colorComponentForValue(0, v);
+    addr[1] = colorComponentForValue(1, v);
+    addr[2] = colorComponentForValue(2, v);
+    addr[3] = 255;
     return retval;
 }
 
@@ -1596,8 +1675,12 @@ static void createIceTexture(ModeInfo *mi,
     XDestroyImage(image);
 }
 
-/* Window management, etc
- */
+/*************************************************
+ *
+ *     Window management, etc
+ *
+ *************************************************/
+
 ENTRYPOINT ModeSpecOpt snow_opts = {0, NULL, 0, NULL, NULL};
 
 ENTRYPOINT void
