@@ -2285,6 +2285,9 @@ draw_snow (ModeInfo *mi)
     drawTrees(bp);
     glPopMatrix();
 
+    // Stop drawing shadows
+    glStencilFunc( GL_ALWAYS, 0, 1 );
+    glStencilOp( GL_KEEP, GL_KEEP, GL_KEEP );
     glDisable(GL_STENCIL_TEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LESS);
