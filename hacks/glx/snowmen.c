@@ -2237,7 +2237,7 @@ draw_snow (ModeInfo *mi)
     glMatrixMode( GL_MODELVIEW );
     glLoadIdentity();
     gluLookAt(kCameraRadius * sin(0 - bp->cameraRho), kCameraHeight, kCameraRadius * cos(bp->cameraRho),
-              0, 0, 0,
+              0, 1, 0,
               0, 1, 0);
     
     glEnableClientState(GL_VERTEX_ARRAY);
